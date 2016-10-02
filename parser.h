@@ -3,6 +3,9 @@
 
 #include "stdio.h"
 
+#define OK 1
+#define NOK 0
+
 typedef struct packet{
     //content of the packet
     struct packet* next;
@@ -21,6 +24,7 @@ void initParser(parser_t* parser);
 int checkMagicNumber(unsigned char* mag_num);
 void printVersionNumber(unsigned char* ver_num);
 void printTimeStuff(unsigned char* time);
+int maxPacketLength(unsigned char* packet_len);
 int parse(parser_t* parser, char* filename);  //filename must be correct C string
 
 

@@ -1,8 +1,5 @@
 #include "parser.h"
-
-#define OK 1
-#define NOK 0
-
+#include "utils.h"
 
 void initParser(parser_t *parser){
     parser->packet_list = NULL;
@@ -37,32 +34,29 @@ int checkMagicNumber(unsigned char* mag_num){
 }
 
 void printVersionNumber(unsigned char* ver_num){
-    int majVer = ver_num[1] * 255 + ver_num[0];
-    int minVer = ver_num[3] * 255 + ver_num[2];
+    unsigned int majVer = ver_num[1] * 255 + ver_num[0];
+    unsigned int minVer = ver_num[3] * 255 + ver_num[2];
     printf("Version: %d.%d\n", majVer, minVer);
 }
 
 void printTimeStuff(unsigned char* time){
-    //TODO refactor whole function!!!
-    int time_stuff = time[3];
-    time_stuff = time_stuff << 8;
-    time_stuff += time[2];
-    time_stuff = time_stuff << 8;
-    time_stuff += time[1];
-    time_stuff = time_stuff << 8;
-    time_stuff += time[0];
-
+    unsigned int time_stuff = arrayToUInt(time, 4);
     printf("GMT timezone offset minus the timezone used in the headers in seconds: %d\n", time_stuff);
 
-    int accuracy = time[7];
-    accuracy = accuracy << 8;
-    accuracy += time[6];
-    accuracy = accuracy << 8;
-    accuracy += time[5];
-    accuracy = accuracy << 8;
-    accuracy += time[4];
-
+    unsigned int accuracy = arrayToUInt(time+4, 4);
     printf("Accuracy of the timestamps: %d\n", accuracy);
+}
+
+int maxPacketLength(unsigned char* packet_len){
+    return arrayToUInt(packet_len, 4);
+}
+
+int linkLayerHeaderType(unsigned char* llht){
+    unsigned int type = arrayToUInt(llht, 4);
+    char* header_type_name = headerTypeName(type);
+    printf("Link-Layer Header Type: %s\n", header_type_name);
+    free(header_type_name);
+    return type;
 }
 
 int parse(parser_t *parser, char *filename){
@@ -104,6 +98,27 @@ int parse(parser_t *parser, char *filename){
         return NOK;
     }
     printTimeStuff(time);
+
+    //read maximum packet length (Snapshot Length)
+    unsigned char max_packet_len[4];
+    unsigned int snapshot_length = 0;   //max. packet length
+    read_bytes_num = fread(max_packet_len, uchar_size, 4, file);
+    if(read_bytes_num != 4){
+        printf("Could not read Snapshot Length: File corrupted/too small\n");
+        return NOK;
+    }
+    snapshot_length = maxPacketLength(max_packet_len);
+    printf("Snapshot length: %d bytes\n", snapshot_length);
+
+    //read Link-Layer Header Type
+    unsigned char link_layer_header_type[4];
+    read_bytes_num = fread(link_layer_header_type, uchar_size, 4, file);
+    if(read_bytes_num != 4){
+        printf("Could not read Link-Layer Header Type: File corrupted/too small\n");
+        return NOK;
+    }
+    int llht = linkLayerHeaderType(link_layer_header_type); //also print
+
 
     //read & add packets
 

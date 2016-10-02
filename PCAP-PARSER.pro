@@ -4,7 +4,9 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 SOURCES += main.c \
-    parser.c
+    parser.c \
+    utils.c
 
 HEADERS += \
-    parser.h
+    parser.h \
+    utils.h

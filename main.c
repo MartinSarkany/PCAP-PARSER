@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include "parser.h"
 
 int main(int argc, char *argv[])
@@ -13,7 +14,10 @@ int main(int argc, char *argv[])
     parser_t parser;
     initParser(&parser);
 
-    parse(&parser, filename);
+    if(parse(&parser, filename) == NOK){
+        printf("\n\n PARSING FAILED\n\n");
+        exit(1);
+    }
 
     return 0;
 }
