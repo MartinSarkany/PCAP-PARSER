@@ -117,10 +117,12 @@ int parse(parser_t *parser, char *filename){
         printf("Could not read Link-Layer Header Type: File corrupted/too small\n");
         return NOK;
     }
-    int llht = linkLayerHeaderType(link_layer_header_type); //also print
+    linkLayerHeaderType(link_layer_header_type); //also print
 
 
     //read & add packets
 
+    fclose(file);
+    file = NULL;
     return OK;   // remove/replace
 }
