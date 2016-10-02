@@ -42,7 +42,31 @@ void printVersionNumber(unsigned char* ver_num){
     printf("Version: %d.%d\n", majVer, minVer);
 }
 
+void printTimeStuff(unsigned char* time){
+    //TODO refactor whole function!!!
+    int time_stuff = time[3];
+    time_stuff = time_stuff << 8;
+    time_stuff += time[2];
+    time_stuff = time_stuff << 8;
+    time_stuff += time[1];
+    time_stuff = time_stuff << 8;
+    time_stuff += time[0];
+
+    printf("GMT timezone offset minus the timezone used in the headers in seconds: %d\n", time_stuff);
+
+    int accuracy = time[7];
+    accuracy = accuracy << 8;
+    accuracy += time[6];
+    accuracy = accuracy << 8;
+    accuracy += time[5];
+    accuracy = accuracy << 8;
+    accuracy += time[4];
+
+    printf("Accuracy of the timestamps: %d\n", accuracy);
+}
+
 int parse(parser_t *parser, char *filename){
+    size_t uchar_size = sizeof(unsigned char);
     FILE* file = fopen(filename, "rb");
     if(!file){
         printf("%s:\n", filename);
@@ -53,7 +77,7 @@ int parse(parser_t *parser, char *filename){
     //read first 4 bytes - "Magic number" d4 c3 b2 a1
     unsigned char magic_num[4];
     rewind(file);
-    int read_bytes_num = fread(magic_num, sizeof(unsigned char), 4, file);
+    int read_bytes_num = fread(magic_num, uchar_size, 4, file);
     if(read_bytes_num != 4){
         printf("Could not read magic number: File corrupted/too small\n");
         return NOK;
@@ -63,14 +87,23 @@ int parse(parser_t *parser, char *filename){
         return NOK;
     }
 
-    //read version number
+    //read and print version number
     unsigned char version_num[4];
-    read_bytes_num = fread(version_num, sizeof(unsigned char), 4, file);
+    read_bytes_num = fread(version_num, uchar_size, 4, file);
     if(read_bytes_num != 4){
         printf("Could not read version number: File corrupted/too small\n");
         return NOK;
     }
     printVersionNumber(version_num);
+
+    //read and print some time stuff
+    unsigned char time[8];
+    read_bytes_num = fread(time, uchar_size, 8, file);
+    if(read_bytes_num != 8){
+        printf("Could not read time stuff: File corrupted/too small\n");
+        return NOK;
+    }
+    printTimeStuff(time);
 
     //read & add packets
 
