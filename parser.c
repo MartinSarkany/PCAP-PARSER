@@ -160,22 +160,22 @@ int parse(parser_t *parser, char *filename){
         time_t timestamp;
         if((timestamp = readTimeStamp(file)) == -1){
             printf("Could not read timestamp\n");
-            exit(1);    //continue to next packet instead
+            return NOK;    //continue to next packet instead
         }
         int microsecs;
         if((microsecs = readMicrosecs(file)) == -1){
             printf("Could not read microseconds part of timestamp\n");
-            exit(1);    //continue to next packet instead
+            return NOK;    //continue to next packet instead
         }
         long long capt_data_len;
         if((capt_data_len = readPacketSize(file)) == -1){
             printf("Could not read captured packet size\n");    //restricted to max Snapshot Length
-            exit(1);    //continue to next packet instead
+            return NOK;    //continue to next packet instead
         }
         long long real_data_len;
         if((real_data_len = readPacketSize(file)) == -1){
             printf("Could not read real packet size\n");
-            exit(1);    //continue to next packet instead
+            return NOK;    //continue to next packet instead
         }
 
         printTime(timestamp);
