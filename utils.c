@@ -93,5 +93,5 @@ char* headerTypeName(int header_type_num){ //header_types.txt is shipped togethe
 }
 
 void printTime(time_t time){
-    printf("Capture time: %s\n", ctime(&time));
+    printf("Capture time: %s", ctime(&time));
 }

@@ -179,10 +179,10 @@ int parse(parser_t *parser, char *filename){
         }
 
         printTime(timestamp);
-        printf("%d\n %lld\n %lld\n \n\n", microsecs, capt_data_len, real_data_len);
+        printf("+ %d microseconds\ncaptured packet size: %lld\nreal packet size: %lld\n \n\n", microsecs, capt_data_len, real_data_len);
 
         //skip actual packet - TODO do something useful
-        unsigned char dummybuff[1000];
+        unsigned char dummybuff[capt_data_len];
         if(fread(dummybuff, 1, capt_data_len, file) != capt_data_len){
             break;
         }
