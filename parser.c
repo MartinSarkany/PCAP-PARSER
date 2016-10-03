@@ -6,6 +6,17 @@ void initParser(parser_t *parser){
     parser->size = 0;
 }
 
+packet_t* createPacket(time_t timestamp, int microsecs, int cap_len, int real_len){
+    packet_t* packet = malloc(sizeof(packet_t));
+    packet->timestamp = timestamp;
+    packet->microsecs = microsecs;
+    packet->captured_len = cap_len;
+    packet->real_len = real_len;
+    packet->next = NULL;
+
+    return packet;
+}
+
 //Add packet to list
 packet_t* addPacket(parser_t* parser, packet_t* new_packet){
     //if empty list, initialize
@@ -57,6 +68,31 @@ int linkLayerHeaderType(unsigned char* llht){
     printf("Link-Layer Header Type: %s\n", header_type_name);
     free(header_type_name);
     return type;
+}
+
+long long readStuff(FILE* file, size_t size){   //I didn't want to have FILE here but wanted to make parse() shorter
+    if(size > 7){
+        printf("Overflow could happen, returning -1\n");
+        return -1;
+    }
+    unsigned char stuff_buff[4];
+    if(fread(stuff_buff, sizeof(unsigned char), size, file) != size){
+        return -1;
+    }
+
+    return arrayToUInt(stuff_buff, size);
+}
+
+long long readTimeStamp(FILE* file){
+    return readStuff(file, 4);
+}
+
+long long readMicrosecs(FILE* file){
+    return readStuff(file, 4);
+}
+
+long long readPacketSize(FILE* file){
+    return readStuff(file, 4);
 }
 
 int parse(parser_t *parser, char *filename){
@@ -119,8 +155,40 @@ int parse(parser_t *parser, char *filename){
     }
     linkLayerHeaderType(link_layer_header_type); //also print
 
-
     //read & add packets
+    do{
+        time_t timestamp;
+        if((timestamp = readTimeStamp(file)) == -1){
+            printf("Could not read timestamp\n");
+            exit(1);    //continue to next packet instead
+        }
+        int microsecs;
+        if((microsecs = readMicrosecs(file)) == -1){
+            printf("Could not read microseconds part of timestamp\n");
+            exit(1);    //continue to next packet instead
+        }
+        long long capt_data_len;
+        if((capt_data_len = readPacketSize(file)) == -1){
+            printf("Could not read captured packet size\n");    //restricted to max Snapshot Length
+            exit(1);    //continue to next packet instead
+        }
+        long long real_data_len;
+        if((real_data_len = readPacketSize(file)) == -1){
+            printf("Could not read real packet size\n");
+            exit(1);    //continue to next packet instead
+        }
+
+        printTime(timestamp);
+        printf("%d\n %lld\n %lld\n \n\n", microsecs, capt_data_len, real_data_len);
+
+        //skip actual packet - TODO do something useful
+        unsigned char dummybuff[1000];
+        if(fread(dummybuff, 1, capt_data_len, file) != capt_data_len){
+            break;
+        }
+
+
+    }while(1);
 
     fclose(file);
     file = NULL;
