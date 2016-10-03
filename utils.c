@@ -87,5 +87,7 @@ char* headerTypeName(int header_type_num){ //header_types.txt is shipped togethe
         free(line);
     }while(header_num != header_type_num);
 
+    fclose(types_file);
+
     return header_type_name;
 }
