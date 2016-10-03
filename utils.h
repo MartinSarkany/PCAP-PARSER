@@ -6,9 +6,16 @@
 #include <string.h>
 #include <time.h>
 
+#define IPV4 1
+#define ARP 2
+#define IPV6 3
+#define UNKNOWN -1
+
 unsigned int arrayToUInt(unsigned char* buffer, int size);
 char* headerTypeName(int header_type_num);
 size_t getline(char **lineptr, size_t *n, FILE *stream);
 void printTime(time_t time);
+void printMACAddress(unsigned char* addr);
+void printProtocol(int protocol);
 
 #endif // UTILS_H

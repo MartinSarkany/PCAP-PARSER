@@ -65,6 +65,9 @@ size_t getline(char **lineptr, size_t *n, FILE *stream) {   //stolen from stacko
 
 char* headerTypeName(int header_type_num){ //header_types.txt is shipped together with program so it must be correct
     FILE* types_file = fopen("header_types.txt", "rt");
+    if(!types_file){
+        return "File not found\n";
+    }
     char* line = NULL;
     char* header_type_name;
     size_t len = 0;
@@ -95,3 +98,22 @@ char* headerTypeName(int header_type_num){ //header_types.txt is shipped togethe
 void printTime(time_t time){
     printf("Capture time: %s", ctime(&time));
 }
+
+void printMACAddress(unsigned char* addr){
+    printf("%02x", addr[0]);
+    for(int i=1;i<6;i++){
+        printf(":%02x", addr[i]);
+    }
+    printf("\n");
+}
+
+void printProtocol(int protocol){
+    printf("Protocol: ");
+    switch(protocol){
+    case IPV4: printf("IPv4\n"); break;
+    case ARP: printf("ARP\n"); break;
+    case IPV6: printf("IPv6"); break;
+    default: printf("unknown"); break;
+    }
+}
+

@@ -13,6 +13,11 @@ typedef struct packet{
     int captured_len;
     int real_len;
 
+    unsigned char* src_addr;
+    unsigned char* dst_addr;
+    int type;
+    unsigned char* data;
+
     struct packet* next;
 }packet_t;
 
@@ -22,7 +27,9 @@ typedef struct{
 } parser_t;
 
 
-packet_t* createPacket(time_t timestamp, int microsecs, int cap_len, int real_len);
+packet_t* createPacket(time_t timestamp, int microsecs, int cap_len, int real_len,
+                       unsigned char* src_addr, unsigned char* dst_addr, int type,
+                       unsigned char* data);
 packet_t* addPacket(parser_t* parser, packet_t* new_packet);
 
 void initParser(parser_t* parser);
@@ -35,6 +42,11 @@ long long readStuff(FILE* file, size_t size);
 long long readTimeStamp(FILE* file);
 long long readMicrosecs(FILE* file);
 long long readPacketSize(FILE* file);
+unsigned char* readBytes(FILE* file, size_t size);
+unsigned char* readMACAddress(FILE* file);
+int readType(FILE* file);
+unsigned char* readData(FILE* file, size_t size);
+int skipCRC(FILE* file);
 int parse(parser_t* parser, char* filename);  //filename must be correct C string
 
 

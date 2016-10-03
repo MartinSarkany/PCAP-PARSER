@@ -6,12 +6,20 @@ void initParser(parser_t *parser){
     parser->size = 0;
 }
 
-packet_t* createPacket(time_t timestamp, int microsecs, int cap_len, int real_len){
+packet_t* createPacket(time_t timestamp, int microsecs, int cap_len, int real_len,
+                       unsigned char* src_addr, unsigned char* dst_addr, int type,
+                       unsigned char* data){
     packet_t* packet = malloc(sizeof(packet_t));
     packet->timestamp = timestamp;
     packet->microsecs = microsecs;
     packet->captured_len = cap_len;
     packet->real_len = real_len;
+
+    packet->src_addr = src_addr;
+    packet->dst_addr = dst_addr;
+    packet->type = type;
+    packet->data = data;
+
     packet->next = NULL;
 
     return packet;
@@ -95,6 +103,49 @@ long long readPacketSize(FILE* file){
     return readStuff(file, 4);
 }
 
+unsigned char* readBytes(FILE* file, size_t size){
+    unsigned char* buff = malloc(size);
+    if(fread(buff, sizeof(unsigned char), size, file) != size){
+        return NULL;
+    }
+
+    return buff;
+}
+
+unsigned char* readMACAddress(FILE* file){
+    return readBytes(file, 6);
+}
+
+int readType(FILE* file){
+    unsigned char* type = readBytes(file, 2);
+    if(type[0] == 0x08){
+        if(type[1] == 0x00){
+            return IPV4;
+        }
+        if(type[1] == 0x06){
+            return ARP;
+        }
+    }
+    if(type[0] == 0x86 && type[1] == 0xdd){
+        return IPV6;
+    }
+
+    return UNKNOWN;
+}
+
+unsigned char* readData(FILE* file, size_t size){
+    return readBytes(file, size);
+}
+
+int skipCRC(FILE* file){
+    unsigned char* res = readBytes(file, 4);
+    if(res == NULL){
+        return NOK;
+    }
+    free(res);
+    return OK;
+}
+
 int parse(parser_t *parser, char *filename){
     size_t uchar_size = sizeof(unsigned char);
     FILE* file = fopen(filename, "rb");
@@ -153,7 +204,11 @@ int parse(parser_t *parser, char *filename){
         printf("Could not read Link-Layer Header Type: File corrupted/too small\n");
         return NOK;
     }
-    linkLayerHeaderType(link_layer_header_type); //also print
+    int llht = linkLayerHeaderType(link_layer_header_type); //also print
+    if(llht != 1){
+        printf("Sorry, we are not parsing this.\n");
+        return NOK;
+    }
 
     //read & add packets
     do{
@@ -179,14 +234,44 @@ int parse(parser_t *parser, char *filename){
         }
 
         printTime(timestamp);
-        printf("+ %d microseconds\ncaptured packet size: %lld\nreal packet size: %lld\n \n\n", microsecs, capt_data_len, real_data_len);
+        printf("+ %d microseconds\ncaptured packet size: %lld\nreal packet size: %lld\n", microsecs, capt_data_len, real_data_len);
 
-        //skip actual packet - TODO do something useful
-        unsigned char dummybuff[capt_data_len];
-        if(fread(dummybuff, 1, capt_data_len, file) != capt_data_len){
-            break;
+        unsigned char* dst_addr = readMACAddress(file);
+        if(dst_addr == NULL){
+            printf("Could not read destination MAC address\n");
+            return NOK;
         }
 
+        unsigned char* src_addr = readMACAddress(file);
+        if(dst_addr == NULL){
+            printf("Could not read source MAC address\n");
+            return NOK;
+        }
+
+        printf("Source:");
+        printMACAddress(dst_addr);
+        printf("Destination:");
+        printMACAddress(src_addr);
+
+        int type = readType(file);
+        printProtocol(type);
+
+        unsigned char* data = readData(file, capt_data_len - 18);
+        if(skipCRC(file) == NOK){
+            return NOK;
+        }
+
+        printf("\n\n");
+
+        addPacket(parser, createPacket(timestamp, microsecs, capt_data_len, real_data_len, src_addr, dst_addr, type, data));
+
+        //determine if it's end of file
+        fpos_t position;
+        fgetpos(file, &position);
+        if(fgetc(file) == EOF){
+            break;
+        }
+        fsetpos(file, &position);
 
     }while(1);
 
