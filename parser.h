@@ -18,6 +18,7 @@ typedef struct packet{
     unsigned char* dst_addr;
     int type;
     unsigned char* data;
+    int data_size;
 
     struct packet* next;
 }packet_t;
@@ -30,7 +31,7 @@ typedef struct{
 
 packet_t* createPacket(time_t timestamp, int microsecs, int cap_len, int real_len,
                        unsigned char* src_addr, unsigned char* dst_addr, int type,
-                       unsigned char* data);
+                       unsigned char* data, int data_size);
 packet_t* addPacket(parser_t* parser, packet_t* new_packet);
 
 void initParser(parser_t* parser);

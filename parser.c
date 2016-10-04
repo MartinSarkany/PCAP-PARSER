@@ -8,7 +8,7 @@ void initParser(parser_t *parser){
 
 packet_t* createPacket(time_t timestamp, int microsecs, int cap_len, int real_len,
                        unsigned char* src_addr, unsigned char* dst_addr, int type,
-                       unsigned char* data){
+                       unsigned char* data, int data_size){
     packet_t* packet = malloc(sizeof(packet_t));
     packet->timestamp = timestamp;
     packet->microsecs = microsecs;
@@ -19,6 +19,7 @@ packet_t* createPacket(time_t timestamp, int microsecs, int cap_len, int real_le
     packet->dst_addr = dst_addr;
     packet->type = type;
     packet->data = data;
+    packet->data_size = data_size;
 
     packet->next = NULL;
 
@@ -288,7 +289,7 @@ int parse(parser_t *parser, char *filename){
         //printf("\n\n");
 
         if(type == IPV4){
-            addPacket(parser, createPacket(timestamp, microsecs, capt_data_len, real_data_len, src_addr, dst_addr, type, data));
+            addPacket(parser, createPacket(timestamp, microsecs, capt_data_len, real_data_len, src_addr, dst_addr, type, data, capt_data_len - 18 /*actual data size*/));
         }
 
         //determine if it's end of file
