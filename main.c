@@ -19,5 +19,7 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
+    print2ndLayer(&parser);
+
     return 0;
 }

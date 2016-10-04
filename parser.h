@@ -48,6 +48,8 @@ unsigned char* readMACAddress(FILE* file);
 int readType(FILE* file);
 unsigned char* readData(FILE* file, size_t size);
 int skipCRC(FILE* file);
+void printFrame(packet_t* frame);
+void print2ndLayer(parser_t* parser);
 int parse(parser_t* parser, char* filename);  //filename must be correct C string
 
 

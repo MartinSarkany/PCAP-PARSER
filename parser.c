@@ -151,6 +151,24 @@ int skipCRC(FILE* file){
     return OK;
 }
 
+void printFrame(packet_t* frame){
+    printTime(frame->timestamp);
+    printf("+%d microsecs\nSource MAC address: ", frame->microsecs);
+    printMACAddress(frame->src_addr);
+    printf("Destination MAC address: ");
+    printMACAddress(frame->dst_addr);
+    printf("Size: %d (%d)\n",frame->captured_len, frame->real_len);
+    printf("\n\n");
+}
+
+void print2ndLayer(parser_t* parser){
+    packet_t* frame = parser->packet_list;
+    while(frame){
+        printFrame(frame);
+        frame = frame->next;
+    }
+}
+
 int parse(parser_t *parser, char *filename){
     size_t uchar_size = sizeof(unsigned char);
     FILE* file = fopen(filename, "rb");
@@ -238,8 +256,8 @@ int parse(parser_t *parser, char *filename){
             return NOK;    //continue to next packet instead
         }
 
-        printTime(timestamp);
-        printf("+ %d microseconds\ncaptured packet size: %lld\nreal packet size: %lld\n", microsecs, capt_data_len, real_data_len);
+        //printTime(timestamp);
+        //printf("+ %d microseconds\ncaptured packet size: %lld\nreal packet size: %lld\n", microsecs, capt_data_len, real_data_len);
 
         unsigned char* dst_addr = readMACAddress(file);
         if(dst_addr == NULL){
@@ -253,22 +271,24 @@ int parse(parser_t *parser, char *filename){
             return NOK;
         }
 
-        printf("Source:");
-        printMACAddress(dst_addr);
-        printf("Destination:");
-        printMACAddress(src_addr);
+        //printf("Source:");
+        //printMACAddress(dst_addr);
+        //printf("Destination:");
+        //printMACAddress(src_addr);
 
         int type = readType(file);
-        printProtocol(type);
+        //printProtocol(type);
 
         unsigned char* data = readData(file, capt_data_len - 18);
         if(skipCRC(file) == NOK){
             return NOK;
         }
 
-        printf("\n\n");
+        //printf("\n\n");
 
-        addPacket(parser, createPacket(timestamp, microsecs, capt_data_len, real_data_len, src_addr, dst_addr, type, data));
+        if(type == IPV4){
+            addPacket(parser, createPacket(timestamp, microsecs, capt_data_len, real_data_len, src_addr, dst_addr, type, data));
+        }
 
         //determine if it's end of file
         fpos_t position;
