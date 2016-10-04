@@ -7,8 +7,8 @@
 #define OK 1
 #define NOK 0
 
-typedef struct packet{
-    //content of the packet
+typedef struct frame{
+    //content of the frame
     time_t timestamp;
     int microsecs;
     int captured_len;
@@ -20,30 +20,30 @@ typedef struct packet{
     unsigned char* data;
     int data_size;
 
-    struct packet* next;
+    struct frame* next;
 }frame_t;
 
 typedef struct{
     int size;
-    frame_t *packet_list;
+    frame_t *frame_list;
 } parser_t;
 
 
-frame_t* createPacket(time_t timestamp, int microsecs, int cap_len, int real_len,
+frame_t* createFrame(time_t timestamp, int microsecs, int cap_len, int real_len,
                        unsigned char* src_addr, unsigned char* dst_addr, int type,
                        unsigned char* data, int data_size);
-frame_t* addPacket(parser_t* parser, frame_t* new_packet);
+frame_t* addFrame(parser_t* parser, frame_t* new_frame);
 
 void initParser(parser_t* parser);
 int checkMagicNumber(unsigned char* mag_num);
 void printVersionNumber(unsigned char* ver_num);
 void printTimeStuff(unsigned char* time);
-int maxPacketLength(unsigned char* packet_len);
+int maxFrameLength(unsigned char* frame_len);
 int linkLayerHeaderType(unsigned char* llht);
 long long readStuff(FILE* file, size_t size);
 long long readTimeStamp(FILE* file);
 long long readMicrosecs(FILE* file);
-long long readPacketSize(FILE* file);
+long long readFrameSize(FILE* file);
 unsigned char* readBytes(FILE* file, size_t size);
 unsigned char* readMACAddress(FILE* file);
 int readType(FILE* file);

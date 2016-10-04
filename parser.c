@@ -2,47 +2,47 @@
 #include "utils.h"
 
 void initParser(parser_t *parser){
-    parser->packet_list = NULL;
+    parser->frame_list = NULL;
     parser->size = 0;
 }
 
-frame_t* createPacket(time_t timestamp, int microsecs, int cap_len, int real_len,
+frame_t* createFrame(time_t timestamp, int microsecs, int cap_len, int real_len,
                        unsigned char* src_addr, unsigned char* dst_addr, int type,
                        unsigned char* data, int data_size){
-    frame_t* packet = malloc(sizeof(frame_t));
-    packet->timestamp = timestamp;
-    packet->microsecs = microsecs;
-    packet->captured_len = cap_len;
-    packet->real_len = real_len;
+    frame_t* frame = malloc(sizeof(frame_t));
+    frame->timestamp = timestamp;
+    frame->microsecs = microsecs;
+    frame->captured_len = cap_len;
+    frame->real_len = real_len;
 
-    packet->src_addr = src_addr;
-    packet->dst_addr = dst_addr;
-    packet->type = type;
-    packet->data = data;
-    packet->data_size = data_size;
+    frame->src_addr = src_addr;
+    frame->dst_addr = dst_addr;
+    frame->type = type;
+    frame->data = data;
+    frame->data_size = data_size;
 
-    packet->next = NULL;
+    frame->next = NULL;
 
-    return packet;
+    return frame;
 }
 
-//Add packet to list
-frame_t* addPacket(parser_t* parser, frame_t* new_packet){
+//Add frame to list
+frame_t* addFrame(parser_t* parser, frame_t* new_frame){
     //if empty list, initialize
-    if(!parser->packet_list){
+    if(!parser->frame_list){
         parser->size++;
-        parser->packet_list = new_packet;
-        return new_packet;
+        parser->frame_list = new_frame;
+        return new_frame;
     }
 
-    //if not empty, find the last packet and add the new one
-    frame_t* current_packet = parser->packet_list;
-    while(current_packet->next != NULL){
-        current_packet = current_packet->next;
+    //if not empty, find the last frame and add the new one
+    frame_t* current_frame = parser->frame_list;
+    while(current_frame->next != NULL){
+        current_frame = current_frame->next;
     }
-    current_packet->next = new_packet;
+    current_frame->next = new_frame;
 
-    return new_packet;
+    return new_frame;
 }
 
 int checkMagicNumber(unsigned char* mag_num){
@@ -68,8 +68,8 @@ void printTimeStuff(unsigned char* time){
     printf("Accuracy of the timestamps: %d\n", accuracy);
 }
 
-int maxPacketLength(unsigned char* packet_len){
-    return arrayToUInt(packet_len, 4);
+int maxFrameLength(unsigned char* frame_len){
+    return arrayToUInt(frame_len, 4);
 }
 
 int linkLayerHeaderType(unsigned char* llht){
@@ -106,7 +106,7 @@ long long readMicrosecs(FILE* file){
     return readStuff(file, 4);
 }
 
-long long readPacketSize(FILE* file){
+long long readFrameSize(FILE* file){
     return readStuff(file, 4);
 }
 
@@ -164,7 +164,7 @@ void printFrame(frame_t* frame){
 }
 
 void print2ndLayer(parser_t* parser){
-    frame_t* frame = parser->packet_list;
+    frame_t* frame = parser->frame_list;
     while(frame){
         printFrame(frame);
         frame = frame->next;
@@ -211,15 +211,15 @@ int parse(parser_t *parser, char *filename){
     }
     printTimeStuff(time);
 
-    //read maximum packet length (Snapshot Length)
-    unsigned char max_packet_len[4];
-    unsigned int snapshot_length = 0;   //max. packet length
-    read_bytes_num = fread(max_packet_len, uchar_size, 4, file);
+    //read maximum frame length (Snapshot Length)
+    unsigned char max_frame_len[4];
+    unsigned int snapshot_length = 0;   //max. frame length
+    read_bytes_num = fread(max_frame_len, uchar_size, 4, file);
     if(read_bytes_num != 4){
         printf("Could not read Snapshot Length: File corrupted/too small\n");
         return NOK;
     }
-    snapshot_length = maxPacketLength(max_packet_len);
+    snapshot_length = maxFrameLength(max_frame_len);
     printf("Snapshot length: %d bytes\n", snapshot_length);
 
     //read Link-Layer Header Type
@@ -235,31 +235,31 @@ int parse(parser_t *parser, char *filename){
         return NOK;
     }
 
-    //read & add packets
+    //read & add frames
     do{
         time_t timestamp;
         if((timestamp = readTimeStamp(file)) == -1){
             printf("Could not read timestamp\n");
-            return NOK;    //continue to next packet instead
+            return NOK;    //continue to next frame instead
         }
         int microsecs;
         if((microsecs = readMicrosecs(file)) == -1){
             printf("Could not read microseconds part of timestamp\n");
-            return NOK;    //continue to next packet instead
+            return NOK;    //continue to next frame instead
         }
         long long capt_data_len;
-        if((capt_data_len = readPacketSize(file)) == -1){
-            printf("Could not read captured packet size\n");    //restricted to max Snapshot Length
-            return NOK;    //continue to next packet instead
+        if((capt_data_len = readFrameSize(file)) == -1){
+            printf("Could not read captured frame size\n");    //restricted to max Snapshot Length
+            return NOK;    //continue to next frame instead
         }
         long long real_data_len;
-        if((real_data_len = readPacketSize(file)) == -1){
-            printf("Could not read real packet size\n");
-            return NOK;    //continue to next packet instead
+        if((real_data_len = readFrameSize(file)) == -1){
+            printf("Could not read real frame size\n");
+            return NOK;    //continue to next frame instead
         }
 
         //printTime(timestamp);
-        //printf("+ %d microseconds\ncaptured packet size: %lld\nreal packet size: %lld\n", microsecs, capt_data_len, real_data_len);
+        //printf("+ %d microseconds\ncaptured frame size: %lld\nreal frame size: %lld\n", microsecs, capt_data_len, real_data_len);
 
         unsigned char* dst_addr = readMACAddress(file);
         if(dst_addr == NULL){
@@ -289,7 +289,7 @@ int parse(parser_t *parser, char *filename){
         //printf("\n\n");
 
         if(type == IPV4){
-            addPacket(parser, createPacket(timestamp, microsecs, capt_data_len, real_data_len, src_addr, dst_addr, type, data, capt_data_len - 18 /*actual data size*/));
+            addFrame(parser, createFrame(timestamp, microsecs, capt_data_len, real_data_len, src_addr, dst_addr, type, data, capt_data_len - 18 /*actual data size*/));
         }
 
         //determine if it's end of file
