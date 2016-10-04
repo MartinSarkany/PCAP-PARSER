@@ -73,6 +73,11 @@ int maxPacketLength(unsigned char* packet_len){
 int linkLayerHeaderType(unsigned char* llht){
     unsigned int type = arrayToUInt(llht, 4);
     char* header_type_name = headerTypeName(type);
+    if(!header_type_name){
+        header_type_name = malloc(16 * sizeof(char));
+        memset(header_type_name, sizeof(char), 16);
+        strcpy(header_type_name, "File not found\n");
+    }
     printf("Link-Layer Header Type: %s\n", header_type_name);
     free(header_type_name);
     return type;

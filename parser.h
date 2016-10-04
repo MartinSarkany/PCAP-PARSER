@@ -2,6 +2,7 @@
 #define PARSER_H
 
 #include "stdio.h"
+#include <time.h>
 
 #define OK 1
 #define NOK 0

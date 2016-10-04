@@ -10,6 +10,7 @@ unsigned int arrayToUInt(unsigned char* buffer, int size){
     return value;
 }
 
+#ifdef _WIN32
 size_t getline(char **lineptr, size_t *n, FILE *stream) {   //stolen from stackoverflow.com
     char *bufptr = NULL;
     char *p = bufptr;
@@ -62,11 +63,13 @@ size_t getline(char **lineptr, size_t *n, FILE *stream) {   //stolen from stacko
 
     return p - bufptr - 1;
 }
+#endif
+
 
 char* headerTypeName(int header_type_num){ //header_types.txt is shipped together with program so it must be correct
     FILE* types_file = fopen("header_types.txt", "rt");
     if(!types_file){
-        return "File not found\n";
+        return NULL;
     }
     char* line = NULL;
     char* header_type_name;

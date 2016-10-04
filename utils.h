@@ -11,9 +11,12 @@
 #define IPV6 3
 #define UNKNOWN -1
 
+#ifdef _WIN32
+size_t getline(char **lineptr, size_t *n, FILE *stream);
+#endif
+
 unsigned int arrayToUInt(unsigned char* buffer, int size);
 char* headerTypeName(int header_type_num);
-size_t getline(char **lineptr, size_t *n, FILE *stream);
 void printTime(time_t time);
 void printMACAddress(unsigned char* addr);
 void printProtocol(int protocol);
