@@ -67,7 +67,7 @@ size_t getline(char **lineptr, size_t *n, FILE *stream) {   //stolen from stacko
 
 
 char* headerTypeName(int header_type_num){ //header_types.txt is shipped together with program so it must be correct
-    FILE* types_file = fopen("header_types.txt", "rt");
+    FILE* types_file = fopen("../PCAP-PARSER/header_types.txt", "rt");
     if(!types_file){
         return NULL;
     }

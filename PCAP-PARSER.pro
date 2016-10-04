@@ -10,3 +10,6 @@ SOURCES += main.c \
 HEADERS += \
     parser.h \
     utils.h
+
+DISTFILES += \
+    header_types.txt
