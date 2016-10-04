@@ -21,18 +21,18 @@ typedef struct packet{
     int data_size;
 
     struct packet* next;
-}packet_t;
+}frame_t;
 
 typedef struct{
     int size;
-    packet_t *packet_list;
+    frame_t *packet_list;
 } parser_t;
 
 
-packet_t* createPacket(time_t timestamp, int microsecs, int cap_len, int real_len,
+frame_t* createPacket(time_t timestamp, int microsecs, int cap_len, int real_len,
                        unsigned char* src_addr, unsigned char* dst_addr, int type,
                        unsigned char* data, int data_size);
-packet_t* addPacket(parser_t* parser, packet_t* new_packet);
+frame_t* addPacket(parser_t* parser, frame_t* new_packet);
 
 void initParser(parser_t* parser);
 int checkMagicNumber(unsigned char* mag_num);
@@ -49,7 +49,7 @@ unsigned char* readMACAddress(FILE* file);
 int readType(FILE* file);
 unsigned char* readData(FILE* file, size_t size);
 int skipCRC(FILE* file);
-void printFrame(packet_t* frame);
+void printFrame(frame_t* frame);
 void print2ndLayer(parser_t* parser);
 int parse(parser_t* parser, char* filename);  //filename must be correct C string
 

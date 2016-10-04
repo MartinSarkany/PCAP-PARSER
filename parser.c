@@ -6,10 +6,10 @@ void initParser(parser_t *parser){
     parser->size = 0;
 }
 
-packet_t* createPacket(time_t timestamp, int microsecs, int cap_len, int real_len,
+frame_t* createPacket(time_t timestamp, int microsecs, int cap_len, int real_len,
                        unsigned char* src_addr, unsigned char* dst_addr, int type,
                        unsigned char* data, int data_size){
-    packet_t* packet = malloc(sizeof(packet_t));
+    frame_t* packet = malloc(sizeof(frame_t));
     packet->timestamp = timestamp;
     packet->microsecs = microsecs;
     packet->captured_len = cap_len;
@@ -27,7 +27,7 @@ packet_t* createPacket(time_t timestamp, int microsecs, int cap_len, int real_le
 }
 
 //Add packet to list
-packet_t* addPacket(parser_t* parser, packet_t* new_packet){
+frame_t* addPacket(parser_t* parser, frame_t* new_packet){
     //if empty list, initialize
     if(!parser->packet_list){
         parser->size++;
@@ -36,7 +36,7 @@ packet_t* addPacket(parser_t* parser, packet_t* new_packet){
     }
 
     //if not empty, find the last packet and add the new one
-    packet_t* current_packet = parser->packet_list;
+    frame_t* current_packet = parser->packet_list;
     while(current_packet->next != NULL){
         current_packet = current_packet->next;
     }
@@ -153,7 +153,7 @@ int skipCRC(FILE* file){
     return OK;
 }
 
-void printFrame(packet_t* frame){
+void printFrame(frame_t* frame){
     printTime(frame->timestamp);
     printf("+%d microsecs\nSource MAC address: ", frame->microsecs);
     printMACAddress(frame->src_addr);
@@ -164,7 +164,7 @@ void printFrame(packet_t* frame){
 }
 
 void print2ndLayer(parser_t* parser){
-    packet_t* frame = parser->packet_list;
+    frame_t* frame = parser->packet_list;
     while(frame){
         printFrame(frame);
         frame = frame->next;
