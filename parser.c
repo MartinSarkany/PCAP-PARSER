@@ -29,6 +29,7 @@ packet_t* createPacket(time_t timestamp, int microsecs, int cap_len, int real_le
 packet_t* addPacket(parser_t* parser, packet_t* new_packet){
     //if empty list, initialize
     if(!parser->packet_list){
+        parser->size++;
         parser->packet_list = new_packet;
         return new_packet;
     }
