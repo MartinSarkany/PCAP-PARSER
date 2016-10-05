@@ -13,3 +13,5 @@ HEADERS += \
 
 DISTFILES += \
     header_types.txt
+
+QMAKE_CFLAGS += -Wformat -Wformat-y2k -Wno-format-zero-length -Wformat-nonliteral -Wformat-security -Wformat=2
