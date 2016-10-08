@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include "eth_frame.h"
 #include "ipv4.h"
+#include "udp.h"
 //#include "utils.h"
 
 #define OK 1
@@ -14,6 +15,7 @@ typedef struct{
     //int packets_num;
     frame_t* frame_list;
     packet_t* packet_list;
+    datagram_t* datagram_list;
 } parser_t;
 
 
@@ -41,6 +43,8 @@ void printFrame(frame_t* frame);
 void print2ndLayer(parser_t* parser);
 void printPacket(packet_t* packet);
 void print3rdLayer(parser_t* parser);
+void printDatagram(datagram_t* datagram);
+void print4thLayer(parser_t* parser);
 int parse(parser_t* parser, char* filename);  //filename must be correct C string
 
 

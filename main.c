@@ -21,7 +21,9 @@ int main(int argc, char *argv[])
 
     //print2ndLayer(&parser);
     process_frames(parser.frame_list, &parser.packet_list);
-    print3rdLayer(&parser);
+    //print3rdLayer(&parser);
+    process_datagrams(parser.packet_list, &parser.datagram_list);
+    print4thLayer(&parser);
 
     return 0;
 }

@@ -23,6 +23,7 @@ typedef struct packet{
 
 int extractVersion(unsigned char v);
 int extractHeaderLength(unsigned char hl);
+int extractTotalLength(unsigned char* buff);
 int isFragmented(unsigned char b);
 int zeroOffset(unsigned char* buff);
 int isUDP(unsigned char b);

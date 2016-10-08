@@ -1,3 +1,5 @@
+#include "udp.h"
+
 /*This file has routines to process UDP Packets*/
 
 typedef unsigned char BOOL;
@@ -67,4 +69,65 @@ u16 UDP_Checksum(u16 len_udp, u16 src_addr[],u16 dest_addr[], BOOL padding, u16 
 
 // ////////////////////////////////////////////////////////
 
+
+datagram_t* createDatagram(int src_port, int dst_port, int data_size, packet_t* packet){
+    datagram_t* datagram = malloc(sizeof(datagram_t));
+    datagram->next = NULL;
+
+    datagram->data_size = data_size;
+    datagram->src_port = src_port;
+    datagram->dst_port = dst_port;
+    datagram->packet = packet;
+
+    return datagram;
+}
+
+datagram_t* addDatagram(datagram_t** datagram_list_p, datagram_t* new_datagram){
+    if(!(*datagram_list_p)){
+        *datagram_list_p = new_datagram;
+        return new_datagram;
+    }
+
+    datagram_t* current_datagram = *datagram_list_p;
+    while(current_datagram->next != NULL){
+        current_datagram = current_datagram->next;
+    }
+    current_datagram->next = new_datagram;
+
+    return new_datagram;
+}
+
+int extractPort(unsigned char* buff){
+    return arrayToUIntBE(buff, 2);
+}
+
+int process_datagrams(packet_t* packet_list, datagram_t** datagram_list_p){
+    if(!packet_list){
+        return NOK;
+    }
+
+    //(*datagram_list_p) = malloc(sizeof(datagram_t*));
+    packet_t* cur_packet = packet_list;
+
+    do{
+        if(cur_packet->data_size < 8){
+            printf("Corrupted datagram");
+            cur_packet = cur_packet->next;
+            continue;
+        }
+        unsigned char* data = cur_packet->data; //just to shorten name
+
+        int src_port = extractPort(data);
+        int dst_port = extractPort(data + 2);
+
+        int total_len = extractTotalLength(data + 4);
+        int data_len = total_len - 8;
+
+        addDatagram(datagram_list_p, createDatagram(src_port, dst_port, data_len, cur_packet));
+
+        cur_packet = cur_packet->next;
+    }while(cur_packet != NULL);
+
+    return OK;
+}
 

@@ -3,6 +3,7 @@
 void initParser(parser_t *parser){
     parser->frame_list = NULL;
     parser->packet_list = NULL;
+    parser->datagram_list = NULL;
     //parser->frames_num = 0;
     //parser->packets_num = 0;
 }
@@ -187,6 +188,26 @@ void print3rdLayer(parser_t* parser){
     while(packet){
         printPacket(packet);
         packet = packet->next;
+    }
+}
+
+void printDatagram(datagram_t* datagram){
+    packet_t* packet = datagram->packet;
+    printTime(packet->timestamp);
+    printf("+%d microseconds\nSource ", packet->microsecs);
+    printIPAddress(packet->src_IP);
+    printf("Destination ");
+    printIPAddress(packet->dst_IP);
+    printf("Source port: %d\nDestination port: %d\n", datagram->src_port, datagram->dst_port);
+    printf("Data size: %d", datagram->data_size);
+    printf("\n\n");
+}
+
+void print4thLayer(parser_t* parser){
+    datagram_t* datagram = parser->datagram_list;
+    while(datagram){
+        printDatagram(datagram);
+        datagram = datagram->next;
     }
 }
 
