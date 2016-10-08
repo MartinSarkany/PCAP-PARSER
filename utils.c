@@ -10,6 +10,16 @@ unsigned int arrayToUInt(unsigned char* buffer, int size){
     return value;
 }
 
+unsigned int arrayToUIntBE(unsigned char* buffer, int size){
+    unsigned int value = 0;
+    for(int i = 0;i<size;i++){
+        value = value << 8;
+        value += buffer[i];
+    }
+
+    return value;
+}
+
 #ifdef _WIN32
 size_t getline(char **lineptr, size_t *n, FILE *stream) {   //stolen from stackoverflow.com
     char *bufptr = NULL;
@@ -87,7 +97,10 @@ char* headerTypeName(int header_type_num){ //header_types.txt is shipped togethe
         }
         h_num[space_pos] = 0;
         header_num = atoi(h_num);
-        int name_len = strlen(line + space_pos + 1);
+        if(header_num != header_type_num){
+            continue;
+        }
+        int name_len = strlen(line + space_pos) + 1;
         header_type_name = malloc((name_len + 1) * sizeof(char));
         strcpy(header_type_name, line + space_pos + 1);
         free(line);
@@ -119,4 +132,9 @@ void printProtocol(int protocol){
     default: printf("unknown"); break;
     }
 }
+
+void printIPAddress(unsigned char* addr){
+    printf("IP: %u.%u.%u.%u\n", addr[0], addr[1], addr[2], addr[3]);
+}
+
 

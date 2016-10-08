@@ -19,7 +19,9 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
-    print2ndLayer(&parser);
+    //print2ndLayer(&parser);
+    process_frames(parser.frame_list, &parser.packet_list);
+    print3rdLayer(&parser);
 
     return 0;
 }

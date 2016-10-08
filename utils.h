@@ -15,10 +15,15 @@
 size_t getline(char **lineptr, size_t *n, FILE *stream);
 #endif
 
+//little endian
 unsigned int arrayToUInt(unsigned char* buffer, int size);
+//big endian
+unsigned int arrayToUIntBE(unsigned char* buffer, int size);
 char* headerTypeName(int header_type_num);
 void printTime(time_t time);
 void printMACAddress(unsigned char* addr);
 void printProtocol(int protocol);
+
+void printIPAddress(unsigned char* addr);
 
 #endif // UTILS_H

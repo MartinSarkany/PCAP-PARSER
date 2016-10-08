@@ -5,11 +5,16 @@ CONFIG -= qt
 
 SOURCES += main.c \
     parser.c \
-    utils.c
+    utils.c \
+    udp.c \
+    ipv4.c
 
 HEADERS += \
     parser.h \
-    utils.h
+    utils.h \
+    udp.h \
+    ipv4.h \
+    eth_frame.h
 
 DISTFILES += \
     header_types.txt

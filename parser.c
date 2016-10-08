@@ -1,9 +1,10 @@
 #include "parser.h"
-#include "utils.h"
 
 void initParser(parser_t *parser){
     parser->frame_list = NULL;
-    parser->size = 0;
+    parser->packet_list = NULL;
+    //parser->frames_num = 0;
+    //parser->packets_num = 0;
 }
 
 frame_t* createFrame(time_t timestamp, int microsecs, int cap_len, int real_len,
@@ -30,7 +31,6 @@ frame_t* createFrame(time_t timestamp, int microsecs, int cap_len, int real_len,
 frame_t* addFrame(parser_t* parser, frame_t* new_frame){
     //if empty list, initialize
     if(!parser->frame_list){
-        parser->size++;
         parser->frame_list = new_frame;
         return new_frame;
     }
@@ -41,6 +41,7 @@ frame_t* addFrame(parser_t* parser, frame_t* new_frame){
         current_frame = current_frame->next;
     }
     current_frame->next = new_frame;
+    //parser->frames_num++;
 
     return new_frame;
 }
@@ -168,6 +169,24 @@ void print2ndLayer(parser_t* parser){
     while(frame){
         printFrame(frame);
         frame = frame->next;
+    }
+}
+
+void printPacket(packet_t* packet){
+    printTime(packet->timestamp);
+    printf("+%d microsecs\nSource ", packet->microsecs);
+    printIPAddress(packet->src_IP);
+    printf("Destination ");
+    printIPAddress(packet->dst_IP);
+    printf("Size: %d\n",packet->data_size);
+    printf("\n\n");
+}
+
+void print3rdLayer(parser_t* parser){
+    packet_t* packet = parser->packet_list;
+    while(packet){
+        printPacket(packet);
+        packet = packet->next;
     }
 }
 

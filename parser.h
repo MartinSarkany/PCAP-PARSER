@@ -1,31 +1,19 @@
 #ifndef PARSER_H
 #define PARSER_H
 
-#include "stdio.h"
-#include <time.h>
+#include <stdio.h>
+#include "eth_frame.h"
+#include "ipv4.h"
+//#include "utils.h"
 
 #define OK 1
 #define NOK 0
 
-typedef struct frame{
-    //content of the frame
-    time_t timestamp;
-    int microsecs;
-    int captured_len;
-    int real_len;
-
-    unsigned char* src_addr;
-    unsigned char* dst_addr;
-    int type;
-    unsigned char* data;
-    int data_size;
-
-    struct frame* next;
-}frame_t;
-
 typedef struct{
-    int size;
-    frame_t *frame_list;
+    //int frames_num;
+    //int packets_num;
+    frame_t* frame_list;
+    packet_t* packet_list;
 } parser_t;
 
 
@@ -51,6 +39,8 @@ unsigned char* readData(FILE* file, size_t size);
 int skipCRC(FILE* file);
 void printFrame(frame_t* frame);
 void print2ndLayer(parser_t* parser);
+void printPacket(packet_t* packet);
+void print3rdLayer(parser_t* parser);
 int parse(parser_t* parser, char* filename);  //filename must be correct C string
 
 
