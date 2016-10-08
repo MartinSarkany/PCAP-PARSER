@@ -69,21 +69,16 @@ packet_t* addPacket(packet_t** packet_list_p, packet_t* new_packet){
         current_packet = current_packet->next;
     }
     current_packet->next = new_packet;
-    //parser->packets_num++;
 
     return new_packet;
 }
 
-
-// extracts IPv4 packets from frames
 int process_frames(frame_t* frame_list, packet_t** packet_list_p){
     if(!frame_list){
         return NOK;
     }
 
-    //(*packet_list_p) = malloc(sizeof(packet_t*));
     frame_t* cur_frame = frame_list;
-
     do{
         if(cur_frame->data_size < 16){
             printf("Corrupted packet");
@@ -92,14 +87,12 @@ int process_frames(frame_t* frame_list, packet_t** packet_list_p){
         }
         unsigned char* data = cur_frame->data; //just to shorten name
         int version = extractVersion(data[0]);
-        //printf("IP version: %u\n", version);
         if(version != 4){
             printf("Wrong version, shouldn't happen\n");
             cur_frame = cur_frame->next;
             continue;
         }
         int header_len = extractHeaderLength(data[0]);
-        //printf("Header length: %d bytes\n", header_len);
         if(cur_frame->data_size < header_len){
             printf("Corupted packet\n");
             cur_frame = cur_frame->next;
@@ -107,38 +100,24 @@ int process_frames(frame_t* frame_list, packet_t** packet_list_p){
         }
         int total_len = extractTotalLength(data + 2);
         int data_len = total_len - header_len;
-        //printf("Total length: %d\nData length: %d\n", total_len, data_len);
         int fragmented = isFragmented(data[6]);
-        /*if(fragmented){
-            printf("Fragmented\n");
-        } else {
-            printf("Not fragmented\n");
-        }*/
         if(fragmented && !zeroOffset(data+6)){
-            //printf("Non-zero offset, continueing..\n");
             cur_frame = cur_frame->next;
             continue; //not the first fragment (we don't care about data, just the header)
         }
         int is_udp = isUDP(data[9]);
         if(!is_udp){
-            //printf("Not UDP\n");
             cur_frame = cur_frame->next;
             continue;
         }
         unsigned char* src_IP = extractIPAddr(data + 12);
         unsigned char* dst_IP = extractIPAddr(data + 16);
-        /*printf("Source ");
-        printIPAddress(src_IP);
-        printf("Destination ");
-        printIPAddress(dst_IP);*/
 
         unsigned char* packet_data = malloc(data_len);
         memcpy(packet_data, data + header_len, data_len);
 
         addPacket(packet_list_p, createPacket(cur_frame->timestamp, cur_frame->microsecs, src_IP, dst_IP, packet_data, data_len));
 
-
-        //printf("\n");
         cur_frame = cur_frame->next;
     }while(cur_frame != NULL);
 

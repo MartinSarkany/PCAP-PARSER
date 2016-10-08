@@ -7,7 +7,8 @@ SOURCES += main.c \
     parser.c \
     utils.c \
     udp.c \
-    ipv4.c
+    ipv4.c \
+    eth_frame.c
 
 HEADERS += \
     parser.h \

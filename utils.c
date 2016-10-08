@@ -21,7 +21,7 @@ unsigned int arrayToUIntBE(unsigned char* buffer, int size){
 }
 
 #ifdef _WIN32
-size_t getline(char **lineptr, size_t *n, FILE *stream) {   //stolen from stackoverflow.com
+size_t getline(char **lineptr, size_t *n, FILE *stream) {
     char *bufptr = NULL;
     char *p = bufptr;
     size_t size;
@@ -109,6 +109,12 @@ char* headerTypeName(int header_type_num){ //header_types.txt is shipped togethe
     fclose(types_file);
 
     return header_type_name;
+}
+
+void printVersionNumber(unsigned char* ver_num){
+    unsigned int majVer = ver_num[1] * 255 + ver_num[0];
+    unsigned int minVer = ver_num[3] * 255 + ver_num[2];
+    printf("Version: %d.%d\n", majVer, minVer);
 }
 
 void printTime(time_t time){

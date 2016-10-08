@@ -66,10 +66,6 @@ u16 UDP_Checksum(u16 len_udp, u16 src_addr[],u16 dest_addr[], BOOL padding, u16 
   return ((u16) sum);
 }
 
-
-// ////////////////////////////////////////////////////////
-
-
 datagram_t* createDatagram(int src_port, int dst_port, int data_size, packet_t* packet){
     datagram_t* datagram = malloc(sizeof(datagram_t));
     datagram->next = NULL;
@@ -101,12 +97,11 @@ int extractPort(unsigned char* buff){
     return arrayToUIntBE(buff, 2);
 }
 
-int process_datagrams(packet_t* packet_list, datagram_t** datagram_list_p){
+int process_packets(packet_t* packet_list, datagram_t** datagram_list_p){
     if(!packet_list){
         return NOK;
     }
 
-    //(*datagram_list_p) = malloc(sizeof(datagram_t*));
     packet_t* cur_packet = packet_list;
 
     do{

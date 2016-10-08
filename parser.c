@@ -4,90 +4,9 @@ void initParser(parser_t *parser){
     parser->frame_list = NULL;
     parser->packet_list = NULL;
     parser->datagram_list = NULL;
-    //parser->frames_num = 0;
-    //parser->packets_num = 0;
 }
 
-frame_t* createFrame(time_t timestamp, int microsecs, int cap_len, int real_len,
-                       unsigned char* src_addr, unsigned char* dst_addr, int type,
-                       unsigned char* data, int data_size){
-    frame_t* frame = malloc(sizeof(frame_t));
-    frame->timestamp = timestamp;
-    frame->microsecs = microsecs;
-    frame->captured_len = cap_len;
-    frame->real_len = real_len;
-
-    frame->src_addr = src_addr;
-    frame->dst_addr = dst_addr;
-    frame->type = type;
-    frame->data = data;
-    frame->data_size = data_size;
-
-    frame->next = NULL;
-
-    return frame;
-}
-
-//Add frame to list
-frame_t* addFrame(parser_t* parser, frame_t* new_frame){
-    //if empty list, initialize
-    if(!parser->frame_list){
-        parser->frame_list = new_frame;
-        return new_frame;
-    }
-
-    //if not empty, find the last frame and add the new one
-    frame_t* current_frame = parser->frame_list;
-    while(current_frame->next != NULL){
-        current_frame = current_frame->next;
-    }
-    current_frame->next = new_frame;
-    //parser->frames_num++;
-
-    return new_frame;
-}
-
-int checkMagicNumber(unsigned char* mag_num){
-    if(mag_num[0] != 0xd4 || mag_num[1] != 0xc3 ||
-       mag_num[2] != 0xb2 || mag_num[3] != 0xa1){
-        printf("Magic number checking failed\n");
-        return NOK;
-    }
-    return OK;
-}
-
-void printVersionNumber(unsigned char* ver_num){
-    unsigned int majVer = ver_num[1] * 255 + ver_num[0];
-    unsigned int minVer = ver_num[3] * 255 + ver_num[2];
-    printf("Version: %d.%d\n", majVer, minVer);
-}
-
-void printTimeStuff(unsigned char* time){
-    unsigned int time_stuff = arrayToUInt(time, 4);
-    printf("GMT timezone offset minus the timezone used in the headers in seconds: %d\n", time_stuff);
-
-    unsigned int accuracy = arrayToUInt(time+4, 4);
-    printf("Accuracy of the timestamps: %d\n", accuracy);
-}
-
-int maxFrameLength(unsigned char* frame_len){
-    return arrayToUInt(frame_len, 4);
-}
-
-int linkLayerHeaderType(unsigned char* llht){
-    unsigned int type = arrayToUInt(llht, 4);
-    char* header_type_name = headerTypeName(type);
-    if(!header_type_name){
-        header_type_name = malloc(16 * sizeof(char));
-        memset(header_type_name, sizeof(char), 16);
-        strcpy(header_type_name, "File not found\n");
-    }
-    printf("Link-Layer Header Type: %s\n", header_type_name);
-    free(header_type_name);
-    return type;
-}
-
-long long readStuff(FILE* file, size_t size){   //I didn't want to have FILE here but wanted to make parse() shorter
+long long readStuff(FILE* file, size_t size){
     if(size > 7){
         printf("Overflow could happen, returning -1\n");
         return -1;
@@ -100,6 +19,66 @@ long long readStuff(FILE* file, size_t size){   //I didn't want to have FILE her
     return arrayToUInt(stuff_buff, size);
 }
 
+unsigned char* readBytes(FILE* file, size_t size){
+    unsigned char* buff = malloc(size);
+    if(fread(buff, sizeof(unsigned char), size, file) != size){
+        return NULL;
+    }
+
+    return buff;
+}
+
+int checkMagicNumber(FILE* file){
+    unsigned char* mag_num;
+    if((mag_num = readBytes(file, 4)) == NULL){
+        printf("Unable to read Magic Number\n");
+        return NOK;
+    }
+    if(mag_num[0] != 0xd4 || mag_num[1] != 0xc3 ||
+       mag_num[2] != 0xb2 || mag_num[3] != 0xa1){
+        free(mag_num);
+        return NOK;
+    }
+    free(mag_num);
+    return OK;
+}
+
+int printTimeStuff(FILE* file){
+    unsigned char* time = readBytes(file, 8);
+    if(!time){
+        return NOK;
+    }
+
+    unsigned int time_stuff = arrayToUInt(time, 4);
+    printf("GMT timezone offset minus the timezone used in the headers in seconds: %d\n", time_stuff);
+
+    unsigned int accuracy = arrayToUInt(time+4, 4);
+    printf("Accuracy of the timestamps: %d\n", accuracy);
+
+    return OK;
+}
+
+int linkLayerHeaderType(FILE* file){
+    unsigned char* llht = readBytes(file, 4);
+    if(!llht){
+        return NOK;
+    }
+    unsigned int type = arrayToUInt(llht, 4);
+    char* header_type_name = headerTypeName(type);
+    if(!header_type_name){
+        header_type_name = malloc(16 * sizeof(char));
+        memset(header_type_name, sizeof(char), 16);
+        strcpy(header_type_name, "File not found\n");
+    }
+    printf("Link-Layer Header Type: %s\n", header_type_name);
+    free(header_type_name);
+    return type;
+}
+
+int maxFrameLength(FILE* file){
+    return readStuff(file, 4);
+}
+
 long long readTimeStamp(FILE* file){
     return readStuff(file, 4);
 }
@@ -110,15 +89,6 @@ long long readMicrosecs(FILE* file){
 
 long long readFrameSize(FILE* file){
     return readStuff(file, 4);
-}
-
-unsigned char* readBytes(FILE* file, size_t size){
-    unsigned char* buff = malloc(size);
-    if(fread(buff, sizeof(unsigned char), size, file) != size){
-        return NULL;
-    }
-
-    return buff;
 }
 
 unsigned char* readMACAddress(FILE* file){
@@ -211,8 +181,62 @@ void print4thLayer(parser_t* parser){
     }
 }
 
+long long numDatagrams(parser_t* parser){
+    long long nd = 0;
+    datagram_t* dg = parser->datagram_list;
+    while(dg){
+        nd++;
+        dg = dg->next;
+    }
+
+    return nd;
+}
+
+int parseGlobalHeader(FILE* file){
+    if(!checkMagicNumber(file)){
+        printf("Magic number incorrect\n");
+        return NOK;
+    }
+
+    //read and print version number
+    unsigned char* version_num = readBytes(file, 4);
+    if(!version_num){
+        printf("Could not read version number: File corrupted/too small\n");
+        return NOK;
+    }
+    printVersionNumber(version_num);
+    free(version_num);
+
+    //read and print some time stuff
+
+    if(printTimeStuff(file) == NOK){
+        printf("Could not read time stuff: File corrupted/too small\n");
+        return NOK;
+    }
+
+    //read maximum frame length (Snapshot Length)
+    long long snapshot_length;   //max. frame length
+    if((snapshot_length = maxFrameLength(file)) == -1){
+        printf("Could not read Snapshot Length: File corrupted/too small\n");
+        return NOK;
+    }
+    printf("Snapshot length: %d bytes\n", (unsigned int)snapshot_length);
+
+    //read Link-Layer Header Type
+    int llht = linkLayerHeaderType(file); //also print
+    if(llht == NOK){
+        printf("Could not read Link-Layer Header Type: File corrupted/too small\n");
+        return NOK;
+    }
+    if(llht != 1){
+        printf("Sorry, we are not parsing this.\n");
+        return NOK;
+    }
+
+    return OK;
+}
+
 int parse(parser_t *parser, char *filename){
-    size_t uchar_size = sizeof(unsigned char);
     FILE* file = fopen(filename, "rb");
     if(!file){
         printf("%s:\n", filename);
@@ -220,58 +244,9 @@ int parse(parser_t *parser, char *filename){
         return NOK;
     }
 
-    //read first 4 bytes - "Magic number" d4 c3 b2 a1
-    unsigned char magic_num[4];
     rewind(file);
-    int read_bytes_num = fread(magic_num, uchar_size, 4, file);
-    if(read_bytes_num != 4){
-        printf("Could not read magic number: File corrupted/too small\n");
-        return NOK;
-    }
-    if(!checkMagicNumber(magic_num)){
-        printf("Magic number incorrect\n");
-        return NOK;
-    }
 
-    //read and print version number
-    unsigned char version_num[4];
-    read_bytes_num = fread(version_num, uchar_size, 4, file);
-    if(read_bytes_num != 4){
-        printf("Could not read version number: File corrupted/too small\n");
-        return NOK;
-    }
-    printVersionNumber(version_num);
-
-    //read and print some time stuff
-    unsigned char time[8];
-    read_bytes_num = fread(time, uchar_size, 8, file);
-    if(read_bytes_num != 8){
-        printf("Could not read time stuff: File corrupted/too small\n");
-        return NOK;
-    }
-    printTimeStuff(time);
-
-    //read maximum frame length (Snapshot Length)
-    unsigned char max_frame_len[4];
-    unsigned int snapshot_length = 0;   //max. frame length
-    read_bytes_num = fread(max_frame_len, uchar_size, 4, file);
-    if(read_bytes_num != 4){
-        printf("Could not read Snapshot Length: File corrupted/too small\n");
-        return NOK;
-    }
-    snapshot_length = maxFrameLength(max_frame_len);
-    printf("Snapshot length: %d bytes\n", snapshot_length);
-
-    //read Link-Layer Header Type
-    unsigned char link_layer_header_type[4];
-    read_bytes_num = fread(link_layer_header_type, uchar_size, 4, file);
-    if(read_bytes_num != 4){
-        printf("Could not read Link-Layer Header Type: File corrupted/too small\n");
-        return NOK;
-    }
-    int llht = linkLayerHeaderType(link_layer_header_type); //also print
-    if(llht != 1){
-        printf("Sorry, we are not parsing this.\n");
+    if(parseGlobalHeader(file) == NOK){
         return NOK;
     }
 
@@ -280,56 +255,43 @@ int parse(parser_t *parser, char *filename){
         time_t timestamp;
         if((timestamp = readTimeStamp(file)) == -1){
             printf("Could not read timestamp\n");
-            return NOK;    //continue to next frame instead
+            return NOK;
         }
         int microsecs;
         if((microsecs = readMicrosecs(file)) == -1){
             printf("Could not read microseconds part of timestamp\n");
-            return NOK;    //continue to next frame instead
+            return NOK;
         }
         long long capt_data_len;
         if((capt_data_len = readFrameSize(file)) == -1){
             printf("Could not read captured frame size\n");    //restricted to max Snapshot Length
-            return NOK;    //continue to next frame instead
+            return NOK;
         }
-        long long real_data_len;
+        long long real_data_len;                        //we don't really ned this in this project
         if((real_data_len = readFrameSize(file)) == -1){
             printf("Could not read real frame size\n");
-            return NOK;    //continue to next frame instead
+            return NOK;
         }
-
-        //printTime(timestamp);
-        //printf("+ %d microseconds\ncaptured frame size: %lld\nreal frame size: %lld\n", microsecs, capt_data_len, real_data_len);
-
-        unsigned char* dst_addr = readMACAddress(file);
+        unsigned char* dst_addr = readMACAddress(file); //we don't really ned this in this project
         if(dst_addr == NULL){
             printf("Could not read destination MAC address\n");
             return NOK;
         }
-
-        unsigned char* src_addr = readMACAddress(file);
+        unsigned char* src_addr = readMACAddress(file); //we don't really ned this in this project
         if(dst_addr == NULL){
             printf("Could not read source MAC address\n");
             return NOK;
         }
 
-        //printf("Source:");
-        //printMACAddress(dst_addr);
-        //printf("Destination:");
-        //printMACAddress(src_addr);
-
         int type = readType(file);
-        //printProtocol(type);
 
         unsigned char* data = readData(file, capt_data_len - 18);
         if(skipCRC(file) == NOK){
             return NOK;
         }
 
-        //printf("\n\n");
-
         if(type == IPV4){
-            addFrame(parser, createFrame(timestamp, microsecs, capt_data_len, real_data_len, src_addr, dst_addr, type, data, capt_data_len - 18 /*actual data size*/));
+            addFrame(&parser->frame_list, createFrame(timestamp, microsecs, capt_data_len, real_data_len, src_addr, dst_addr, type, data, capt_data_len - 18 /*actual data size*/));
         }
 
         //determine if it's end of file

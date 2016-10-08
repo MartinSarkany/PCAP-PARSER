@@ -19,10 +19,9 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
-    //print2ndLayer(&parser);
     process_frames(parser.frame_list, &parser.packet_list);
-    //print3rdLayer(&parser);
-    process_datagrams(parser.packet_list, &parser.datagram_list);
+    process_packets(parser.packet_list, &parser.datagram_list);
+    printf("Total number of datagrams: %I64d\n\n", numDatagrams(&parser));
     print4thLayer(&parser);
 
     return 0;
