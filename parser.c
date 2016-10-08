@@ -26,6 +26,7 @@ frame_t* createFrame(time_t timestamp, int microsecs, int cap_len, int real_len,
     return frame;
 }
 
+
 //Add frame to list
 frame_t* addFrame(parser_t* parser, frame_t* new_frame){
     //if empty list, initialize
