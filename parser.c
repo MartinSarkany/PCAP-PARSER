@@ -127,7 +127,7 @@ int skipCRC(FILE* file){
 
 void printFrame(frame_t* frame){
     printTime(frame->timestamp);
-    printf("+%d microsecs\nSource MAC address: ", frame->microsecs);
+    printf("+ %d microsecs\nSource MAC address: ", frame->microsecs);
     printMACAddress(frame->src_addr);
     printf("Destination MAC address: ");
     printMACAddress(frame->dst_addr);
@@ -145,7 +145,7 @@ void print2ndLayer(parser_t* parser){
 
 void printPacket(packet_t* packet){
     printTime(packet->timestamp);
-    printf("+%d microsecs\nSource ", packet->microsecs);
+    printf("+ %d microsecs\nSource ", packet->microsecs);
     printIPAddress(packet->src_IP);
     printf("Destination ");
     printIPAddress(packet->dst_IP);
@@ -164,7 +164,7 @@ void print3rdLayer(parser_t* parser){
 void printDatagram(datagram_t* datagram){
     packet_t* packet = datagram->packet;
     printTime(packet->timestamp);
-    printf("+%d microseconds\nSource ", packet->microsecs);
+    printf("+ %d microseconds\nSource ", packet->microsecs);
     printIPAddress(packet->src_IP);
     printf("Destination ");
     printIPAddress(packet->dst_IP);
