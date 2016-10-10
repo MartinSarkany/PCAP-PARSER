@@ -118,7 +118,7 @@ void printVersionNumber(unsigned char* ver_num){
 }
 
 void printTime(time_t time){
-    printf("Capture time: %s", ctime(&time));
+    printf("Capture time:     %s", ctime(&time));
 }
 
 void printMACAddress(unsigned char* addr){
@@ -140,7 +140,7 @@ void printProtocol(int protocol){
 }
 
 void printIPAddress(unsigned char* addr){
-    printf("IP: %u.%u.%u.%u\n", addr[0], addr[1], addr[2], addr[3]);
+    printf("%u.%u.%u.%u\n", addr[0], addr[1], addr[2], addr[3]);
 }
 
 

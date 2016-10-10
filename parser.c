@@ -164,12 +164,12 @@ void print3rdLayer(parser_t* parser){
 void printDatagram(datagram_t* datagram){
     packet_t* packet = datagram->packet;
     printTime(packet->timestamp);
-    printf("+ %d microseconds\nSource ", packet->microsecs);
+    printf("                  + %d microseconds\nSource IP:        ", packet->microsecs);
     printIPAddress(packet->src_IP);
-    printf("Destination ");
+    printf("Destination IP:   ");
     printIPAddress(packet->dst_IP);
-    printf("Source port: %d\nDestination port: %d\n", datagram->src_port, datagram->dst_port);
-    printf("Data size: %d", datagram->data_size);
+    printf("Source port:      %d\nDestination port: %d\n", datagram->src_port, datagram->dst_port);
+    printf("Data size:        %d", datagram->data_size);
     printf("\n\n");
 }
 
