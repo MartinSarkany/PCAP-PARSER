@@ -39,3 +39,19 @@ frame_t* addFrame(frame_t** frame_list_p, frame_t* new_frame){
 
     return new_frame;
 }
+
+void clearFrame(frame_t* frame){
+    free(frame->dst_addr);
+    free(frame->src_addr);
+    free(frame->data);
+}
+
+void clearFrames(frame_t** frame_list_p){
+    frame_t* cur_frame = (*frame_list_p);
+    while(cur_frame){
+        clearFrame(cur_frame);
+        frame_t* prev_frame = cur_frame;
+        cur_frame = cur_frame->next;
+        free(prev_frame);
+    }
+}

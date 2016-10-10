@@ -73,6 +73,22 @@ packet_t* addPacket(packet_t** packet_list_p, packet_t* new_packet){
     return new_packet;
 }
 
+void clearPacket(packet_t* packet){
+    free(packet->src_IP);
+    free(packet->dst_IP);
+    free(packet->data);
+}
+
+void clearPackets(packet_t** packet_list_p){
+    packet_t* cur_packet = (*packet_list_p);
+    while(cur_packet){
+        clearPacket(cur_packet);
+        packet_t* prev_packet = cur_packet;
+        cur_packet = cur_packet->next;
+        free(prev_packet);
+    }
+}
+
 int process_frames(frame_t* frame_list, packet_t** packet_list_p){
     if(!frame_list){
         return NOK;

@@ -44,6 +44,8 @@ packet_t* createPacket(time_t timestamp, int microsecs, unsigned char* src_IP, u
 packet_t* addPacket(packet_t** packet_list_p, packet_t* new_packet);
 // extracts packets from list of ethernet frames
 int process_frames(frame_t* frame_list, packet_t** packet_list_p);
+// clears the list
+void clearPackets(packet_t** packet_list_p);
 
 
 
