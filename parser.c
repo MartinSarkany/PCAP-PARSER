@@ -127,7 +127,7 @@ int skipCRC(FILE* file){
 
 void printFrame(frame_t* frame){
     printTime(frame->timestamp);
-    printf("+ %d microsecs\nSource MAC address: ", frame->microsecs);
+    printf("+%d microsecs\nSource MAC address: ", frame->microsecs);
     printMACAddress(frame->src_addr);
     printf("Destination MAC address: ");
     printMACAddress(frame->dst_addr);
@@ -145,7 +145,7 @@ void print2ndLayer(parser_t* parser){
 
 void printPacket(packet_t* packet){
     printTime(packet->timestamp);
-    printf("+ %d microsecs\nSource ", packet->microsecs);
+    printf("+%d microsecs\nSource ", packet->microsecs);
     printIPAddress(packet->src_IP);
     printf("Destination ");
     printIPAddress(packet->dst_IP);
@@ -163,14 +163,16 @@ void print3rdLayer(parser_t* parser){
 
 void printDatagram(datagram_t* datagram){
     packet_t* packet = datagram->packet;
+    printf("\n+++++++++++++++++++++ Datagram +++++++++++++++++++++++\n");
     printTime(packet->timestamp);
-    printf("                  + %d microseconds\nSource IP:        ", packet->microsecs);
+    printf("+%d microseconds\nSource ", packet->microsecs);
     printIPAddress(packet->src_IP);
-    printf("Destination IP:   ");
+    printf("Destination ");
     printIPAddress(packet->dst_IP);
-    printf("Source port:      %d\nDestination port: %d\n", datagram->src_port, datagram->dst_port);
-    printf("Data size:        %d", datagram->data_size);
+    printf("Source port: %d\nDestination port: %d\n", datagram->src_port, datagram->dst_port);
+    printf("Data size: %d", datagram->data_size);
     printf("\n\n");
+    //printf("\n+++++++++++++++++++++ Datagram +++++++++++++++++++++++\n");
 }
 
 void print4thLayer(parser_t* parser){
@@ -228,7 +230,8 @@ int parseGlobalHeader(FILE* file){
         printf("Could not read Link-Layer Header Type: File corrupted/too small\n");
         return NOK;
     }
-    if(llht != 1){
+    printf("Link-Layer Header Type: %d\n", llht);
+    if(llht != 1) {
         printf("Sorry, we are not parsing this.\n");
         return NOK;
     }

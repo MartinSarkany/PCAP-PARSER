@@ -21,10 +21,10 @@ int main(int argc, char *argv[])
 
     process_frames(parser.frame_list, &parser.packet_list);
     process_packets(parser.packet_list, &parser.datagram_list);
-    clearFrames(&parser.frame_list);
-    printf("Total number of datagrams: %I24d\n\n", numDatagrams(&parser));
+    printf("Total number of datagrams: %I64d\n\n", numDatagrams(&parser));
+    //verifyChecksum(&parser);
+    printUDPStats();
     print4thLayer(&parser);
-    clearPackets(&parser.packet_list);
 
     return 0;
 }
