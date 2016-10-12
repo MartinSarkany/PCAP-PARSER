@@ -1,7 +1,3 @@
-#include <netinet/in.h>
-#include <arpa/inet.h>
-
-#include "parser.h"
 #include "udp.h"
 
 /*This file has routines to process UDP Packets*/

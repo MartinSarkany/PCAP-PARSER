@@ -29,6 +29,8 @@ typedef struct datagram{
     struct datagram* next;
 } datagram_t;
 
+// prints long long int
+void printLongLong(long long n);
 // return initialized datagram structure
 datagram_t* createDatagram(int src_port, int dst_port, int data_size, packet_t* packet);
 // adds datagram to list
@@ -37,5 +39,6 @@ datagram_t* addDatagram(datagram_t** datagram_list_p, datagram_t* new_datagram);
 int extractPort(unsigned char* buff);
 // extracts datagrams from packets
 int process_packets(packet_t* packet_list, datagram_t** datagram_list_p);
+void printUDPStats();
 
 #endif // UDP_H

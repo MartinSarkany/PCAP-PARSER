@@ -21,7 +21,9 @@ int main(int argc, char *argv[])
 
     process_frames(parser.frame_list, &parser.packet_list);
     process_packets(parser.packet_list, &parser.datagram_list);
-    printf("Total number of datagrams: %I64d\n\n", numDatagrams(&parser));
+    printf("Total number of datagrams: ");
+    printLongLong(numDatagrams(&parser));
+    printf("\n\n");
     //verifyChecksum(&parser);
     printUDPStats();
     print4thLayer(&parser);

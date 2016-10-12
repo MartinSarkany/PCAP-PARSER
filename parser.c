@@ -230,7 +230,7 @@ int parseGlobalHeader(FILE* file){
         printf("Could not read Link-Layer Header Type: File corrupted/too small\n");
         return NOK;
     }
-    printf("Link-Layer Header Type: %d\n", llht);
+
     if(llht != 1) {
         printf("Sorry, we are not parsing this.\n");
         return NOK;

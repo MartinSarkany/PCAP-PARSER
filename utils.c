@@ -1,5 +1,15 @@
 #include "utils.h"
 
+#ifdef WIN32
+void printLongLong(long long n){
+    printf("%I64", n);
+}
+#else
+void printLongLong(long long n){
+    printf("%lld", n);
+}
+#endif
+
 unsigned int arrayToUInt(unsigned char* buffer, int size){
     unsigned int value = 0;
     for(int i = size - 1;i>=0;i--){
