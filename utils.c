@@ -2,7 +2,7 @@
 
 #ifdef WIN32
 void printLongLong(long long n){
-    printf("%I64", n);
+    printf("%I64d", n);
 }
 #else
 void printLongLong(long long n){

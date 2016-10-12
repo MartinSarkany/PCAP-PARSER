@@ -54,4 +54,5 @@ void clearFrames(frame_t** frame_list_p){
         cur_frame = cur_frame->next;
         free(prev_frame);
     }
+    *frame_list_p = NULL;
 }

@@ -87,6 +87,7 @@ void clearPackets(packet_t** packet_list_p){
         cur_packet = cur_packet->next;
         free(prev_packet);
     }
+    *packet_list_p = NULL;
 }
 
 int process_frames(frame_t* frame_list, packet_t** packet_list_p){
