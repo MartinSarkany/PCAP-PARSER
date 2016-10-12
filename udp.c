@@ -10,6 +10,7 @@ typedef unsigned char BOOL;
 typedef unsigned short u16;
 typedef unsigned int u32; //as int is 32 bits on this platform
 
+/*for the statistics of UDP datagrams*/
 struct udp_stats {
   int totalDatagrams;
   int minDataSize;
@@ -25,7 +26,7 @@ u16 UDP_Checksum(u16 len_udp, u16 src_addr[],u16 dest_addr[], BOOL padding, u16 
   u16 prot_udp=17;
   u16 padd=0;
   u16 word16;
-  u32 sum;
+  u32 sum=0;
   int i;
 
   /* Find out if the length of data is even or odd n
@@ -37,9 +38,6 @@ u16 UDP_Checksum(u16 len_udp, u16 src_addr[],u16 dest_addr[], BOOL padding, u16 
     buff[len_udp]=0;
 
   }
-
-  //initialize sum to zero
-  sum=0;
 
   /* make 16 bit words out of every two adjacent 8 bit words and
    calculate the sum of all 16 vit words */
@@ -165,6 +163,17 @@ int process_packets(packet_t* packet_list, datagram_t** datagram_list_p){
 
         int total_len = extractTotalLength(data + 4);
         int data_len = total_len - 8;
+        /* Cross checking of the UDP checksum*/
+        unsigned char EvenorOdd = data_len % 2;  //Even = 0  , Odd = 1  for padding
+        u16 checked_sum;
+        u16 checksum_datagram = extractTotalLength(data + 5);       // getting stored checksum
+
+        checked_sum = UDP_Checksum((u16)total_len, (u16 *) data,(u16*) (data+2), EvenorOdd, (u16 *) (data+5));
+        if(checked_sum != checksum_datagram)
+        {
+                udp_stats.corruptDatagrams++;
+        }
+
 
         // Collect stats on min and max datagram size
         updateMinMaxStats(data_len);
