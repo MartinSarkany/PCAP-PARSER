@@ -6,7 +6,7 @@ void initParser(parser_t *parser){
     parser->datagram_list = NULL;
 }
 
-long long readStuff(FILE* file, size_t size){
+long long readStuff(FILE* file, size_t size){   //reading up to 7 bytes of data
     if(size > 7){
         printf("Overflow could happen, returning -1\n");
         return -1;
@@ -16,13 +16,14 @@ long long readStuff(FILE* file, size_t size){
         return -1;
     }
 
+    // if successfully read, return as number - returns long long so -1 can be returned
     return arrayToUInt(stuff_buff, size);
 }
 
-unsigned char* readBytes(FILE* file, size_t size){
+unsigned char* readBytes(FILE* file, size_t size){  // read data from file and return them as new allocated buffer
     unsigned char* buff = malloc(size);
     if(fread(buff, sizeof(unsigned char), size, file) != size){
-        return NULL;
+        return NULL;    // return NULL if unsuccessful
     }
 
     return buff;
@@ -59,17 +60,26 @@ int printTimeStuff(FILE* file){
 }
 
 int linkLayerHeaderType(FILE* file){
+    // read from file
     unsigned char* llht = readBytes(file, 4);
     if(!llht){
         return NOK;
     }
+    // convert to uint
     unsigned int type = arrayToUInt(llht, 4);
-    char* header_type_name = headerTypeName(type);
-    if(!header_type_name){
-        header_type_name = malloc(16 * sizeof(char));
-        memset(header_type_name, sizeof(char), 16);
-        strcpy(header_type_name, "File not found\n");
+    char* header_type_name;
+    if(type != 1){
+        // read label from file if it's not 1
+        header_type_name = headerTypeName(type);
+        if(!header_type_name){
+            header_type_name = malloc(16 * sizeof(char));
+            memset(header_type_name, sizeof(char), 16);
+            strcpy(header_type_name, "File not found\n");
+        }
+    } else {    // we already know what the 1 is so no need to read the file at all
+        header_type_name = "ETH10MB";   //to speed it up because in most cases type will be 1
     }
+    //print the label
     printf("Link-Layer Header Type: %s\n", header_type_name);
     free(header_type_name);
     return type;
@@ -270,17 +280,17 @@ int parse(parser_t *parser, char *filename){
             printf("Could not read captured frame size\n");    //restricted to max Snapshot Length
             return NOK;
         }
-        long long real_data_len;                        //we don't really ned this in this project
+        long long real_data_len;                        //we don't really need this in this project but anyway..
         if((real_data_len = readFrameSize(file)) == -1){
             printf("Could not read real frame size\n");
             return NOK;
         }
-        unsigned char* dst_addr = readMACAddress(file); //we don't really ned this in this project
+        unsigned char* dst_addr = readMACAddress(file); //we don't really need this in this project but anyway..
         if(dst_addr == NULL){
             printf("Could not read destination MAC address\n");
             return NOK;
         }
-        unsigned char* src_addr = readMACAddress(file); //we don't really ned this in this project
+        unsigned char* src_addr = readMACAddress(file); //we don't really need this in this project but anyway..
         if(dst_addr == NULL){
             printf("Could not read source MAC address\n");
             return NOK;
@@ -309,5 +319,5 @@ int parse(parser_t *parser, char *filename){
 
     fclose(file);
     file = NULL;
-    return OK;   // remove/replace
+    return OK;
 }

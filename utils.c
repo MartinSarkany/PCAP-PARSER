@@ -85,7 +85,11 @@ size_t getline(char **lineptr, size_t *n, FILE *stream) {
 }
 #endif
 
-
+// this function might crash with corrupted header_types.txt
+// correctness of the file is not checked at all
+// parser would definitely work even without this function as
+// it serves only for printing labels for link-layer
+// protocols and we are only parsing one of them
 char* headerTypeName(int header_type_num){ //header_types.txt is shipped together with program so it must be correct
     FILE* types_file = fopen("../PCAP-PARSER/header_types.txt", "rt");
     if(!types_file){

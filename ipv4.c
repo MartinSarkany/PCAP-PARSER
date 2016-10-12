@@ -91,11 +91,13 @@ void clearPackets(packet_t** packet_list_p){
 }
 
 int process_frames(frame_t* frame_list, packet_t** packet_list_p){
+    // return NOK if nothing to process
     if(!frame_list){
         return NOK;
     }
 
     frame_t* cur_frame = frame_list;
+    //process frames in loop
     do{
         if(cur_frame->data_size < 16){
             printf("Corrupted packet");
@@ -130,6 +132,7 @@ int process_frames(frame_t* frame_list, packet_t** packet_list_p){
         unsigned char* src_IP = extractIPAddr(data + 12);
         unsigned char* dst_IP = extractIPAddr(data + 16);
 
+        // copy packet data from frame data (frame data will be freed later in main())
         unsigned char* packet_data = malloc(data_len);
         memcpy(packet_data, data + header_len, data_len);
 
