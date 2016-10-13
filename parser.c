@@ -77,7 +77,8 @@ int linkLayerHeaderType(FILE* file){
             strcpy(header_type_name, "File not found\n");
         }
     } else {    // we already know what the 1 is so no need to read the file at all
-        header_type_name = "ETH10MB";   //to speed it up because in most cases type will be 1
+        header_type_name = malloc(9);   //to speed it up because in most cases type will be 1
+        strcpy(header_type_name, "ETH10MB");
     }
     //print the label
     printf("Link-Layer Header Type: %s\n", header_type_name);
