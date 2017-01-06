@@ -230,7 +230,8 @@ int parseGlobalHeader(FILE* file){
     }
 
     //read maximum frame length (Snapshot Length)
-    long long snapshot_length;   //max. frame length
+    //Fixes #10 Issue : Integer Overflow
+    unsigned long long snapshot_length;   //max. frame length
     if((snapshot_length = maxFrameLength(file)) == -1){
         printf("Could not read Snapshot Length: File corrupted/too small\n");
         return NOK;
