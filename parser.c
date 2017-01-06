@@ -38,9 +38,11 @@ int checkMagicNumber(FILE* file){
     if(mag_num[0] != 0xd4 || mag_num[1] != 0xc3 ||
        mag_num[2] != 0xb2 || mag_num[3] != 0xa1){
         free(mag_num);
+        mag_num = NULL; // Fixes #6 Issue : Memory Safety Violation
         return NOK;
     }
     free(mag_num);
+    mag_num = NULL; // Fixes #6 Issue : Memory Safety Violation 
     return OK;
 }
 
