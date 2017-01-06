@@ -118,6 +118,7 @@ char* headerTypeName(int header_type_num){ //header_types.txt is shipped togethe
         header_type_name = malloc((name_len + 1) * sizeof(char));
         strcpy(header_type_name, line + space_pos + 1);
         free(line);
+        line = NULL; //Fixes #6 Issue : Memory Safety Violation
     }while(header_num != header_type_num);
 
     fclose(types_file);
