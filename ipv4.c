@@ -75,8 +75,11 @@ packet_t* addPacket(packet_t** packet_list_p, packet_t* new_packet){
 
 void clearPacket(packet_t* packet){
     free(packet->src_IP);
+    packet->src_IP = NULL; // Fixes #6 Issue : Memory Safety Violation
     free(packet->dst_IP);
+    packet->dst_IP = NULL; // Fixes #6 Issue : Memory Safety Violation
     free(packet->data);
+    packet->data = NULL; // Fixes #6 Issue : Memory Safety Violation
 }
 
 void clearPackets(packet_t** packet_list_p){
@@ -86,6 +89,7 @@ void clearPackets(packet_t** packet_list_p){
         packet_t* prev_packet = cur_packet;
         cur_packet = cur_packet->next;
         free(prev_packet);
+        prev_packet = NULL; // Fixes #6 Issue : Memory Safety Violation
     }
     *packet_list_p = NULL;
 }
