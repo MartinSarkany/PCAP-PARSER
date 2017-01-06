@@ -85,6 +85,7 @@ int linkLayerHeaderType(FILE* file){
     //print the label
     printf("Link-Layer Header Type: %s\n", header_type_name);
     free(header_type_name);
+    header_type_name = NULL; // Fixes #6 Issue : Memory Safety Violation
     return type;
 }
 
@@ -135,6 +136,7 @@ int skipCRC(FILE* file){
         return NOK;
     }
     free(res);
+    res = NULL; // Fixes #6 Issue : Memory Safety Violation
     return OK;
 }
 
@@ -221,6 +223,7 @@ int parseGlobalHeader(FILE* file){
     }
     printVersionNumber(version_num);
     free(version_num);
+    version_num = NULL; // Fixes #6 Issue : Memory Safety Violation
 
     //read and print some time stuff
 
