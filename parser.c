@@ -53,10 +53,10 @@ int printTimeStuff(FILE* file){
     }
 
     unsigned int time_stuff = arrayToUInt(time, 4);
-    printf("GMT timezone offset minus the timezone used in the headers in seconds: %d\n", time_stuff);
+    printf("GMT timezone offset minus the timezone used in the headers in seconds: %u\n", time_stuff);// changed to correct format specifier
 
     unsigned int accuracy = arrayToUInt(time+4, 4);
-    printf("Accuracy of the timestamps: %d\n", accuracy);
+    printf("Accuracy of the timestamps: %u\n", accuracy); // Fixes #11  Incorrect use of Specifier
 
     return OK;
 }
