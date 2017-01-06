@@ -42,8 +42,11 @@ frame_t* addFrame(frame_t** frame_list_p, frame_t* new_frame){
 
 void clearFrame(frame_t* frame){
     free(frame->dst_addr);
+    frame->dst_addr = NULL; //Fixes #6 Issue : Memory Safety Violation
     free(frame->src_addr);
+    frame->src_addr = NULL; //Fixes #6 Issue : Memory Safety Violation
     free(frame->data);
+    frame->data = NULL; //Fixes #6 Issue : Memory Safety Violation
 }
 
 void clearFrames(frame_t** frame_list_p){
@@ -53,6 +56,7 @@ void clearFrames(frame_t** frame_list_p){
         frame_t* prev_frame = cur_frame;
         cur_frame = cur_frame->next;
         free(prev_frame);
+        prev_frame = NULL; //Fixes #6 Issue : Memory Safety Violation
     }
     *frame_list_p = NULL;
 }
