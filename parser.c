@@ -35,15 +35,20 @@ int checkMagicNumber(FILE* file){
         printf("Unable to read Magic Number\n");
         return NOK;
     }
-    if(mag_num[0] != 0xd4 || mag_num[1] != 0xc3 ||
-       mag_num[2] != 0xb2 || mag_num[3] != 0xa1){
+    if(mag_num[0] == 0xd4 && mag_num[1] == 0xc3 &&
+       mag_num[2] == 0xb2 && mag_num[3] == 0xa1){
         free(mag_num);
         mag_num = NULL; // Fixes #6 Issue : Memory Safety Violation
-        return NOK;
+        return LITTLE_ENDIAN;
+    } else if(mag_num[0] == 0xa1 && mag_num[1] == 0xb2 &&
+              mag_num[2] == 0xc3 && mag_num[3] == 0xd4){
+        free(mag_num);
+        mag_num = NULL;
+        return BIG_ENDIAN;
     }
     free(mag_num);
     mag_num = NULL; // Fixes #6 Issue : Memory Safety Violation 
-    return OK;
+    return NOK;
 }
 
 int printTimeStuff(FILE* file){
@@ -208,8 +213,13 @@ long long numDatagrams(parser_t* parser){
 }
 
 int parseGlobalHeader(FILE* file){
-    if(!checkMagicNumber(file)){
-        printf("Magic number incorrect\n");
+    int mag_num = checkMagicNumber(file);
+    if(mag_num != LITTLE_ENDIAN){
+        if(mag_num == BIG_ENDIAN){
+            printf("Big endian - sorry, we're not parsing this.");
+        } else {
+            printf("Magic number incorrect\n");
+        }
         return NOK;
     }
 
