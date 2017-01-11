@@ -39,6 +39,8 @@ datagram_t* addDatagram(datagram_t** datagram_list_p, datagram_t* new_datagram);
 int extractPort(unsigned char* buff);
 // extracts datagrams from packets
 int process_packets(packet_t* packet_list, datagram_t** datagram_list_p);
+// clears the list
+void clearDatagrams(datagram_t** datagram_list_p);
 void printUDPStats();
 
 #endif // UDP_H

@@ -23,6 +23,8 @@ long long readStuff(FILE* file, size_t size){   //reading up to 7 bytes of data
 unsigned char* readBytes(FILE* file, size_t size){  // read data from file and return them as new allocated buffer
     unsigned char* buff = malloc(size);
     if(fread(buff, sizeof(unsigned char), size, file) != size){
+        free(buff);
+        buff = NULL;
         return NULL;    // return NULL if unsuccessful
     }
 
@@ -39,12 +41,12 @@ int checkMagicNumber(FILE* file){
        mag_num[2] == 0xb2 && mag_num[3] == 0xa1){
         free(mag_num);
         mag_num = NULL; // Fixes #6 Issue : Memory Safety Violation
-        return LITTLE_ENDIAN;
+        return LITTLE_ENDIAN_;
     } else if(mag_num[0] == 0xa1 && mag_num[1] == 0xb2 &&
               mag_num[2] == 0xc3 && mag_num[3] == 0xd4){
         free(mag_num);
         mag_num = NULL;
-        return BIG_ENDIAN;
+        return BIG_ENDIAN_;
     }
     free(mag_num);
     mag_num = NULL; // Fixes #6 Issue : Memory Safety Violation 
@@ -63,6 +65,9 @@ int printTimeStuff(FILE* file){
     unsigned int accuracy = arrayToUInt(time+4, 4);
     printf("Accuracy of the timestamps: %u\n", accuracy); // Fixes #11  Incorrect use of Specifier
 
+    free(time);
+    time = NULL;
+
     return OK;
 }
 
@@ -74,21 +79,20 @@ int linkLayerHeaderType(FILE* file){
     }
     // convert to uint
     unsigned int type = arrayToUInt(llht, 4);
+    free(llht);
+    llht = NULL;
+
     char* header_type_name;
     if(type != 1){
         // not ethernet, we're not parsing this
-        header_type_name = malloc(16 * sizeof(char));
-        memset(header_type_name, sizeof(char), 16);
-        strcpy(header_type_name, "UNKNOWN\n");
+        header_type_name = "UNKNOWN";
 
     } else {    // we already know what the 1 is so no need to read the file at all
-        header_type_name = malloc(9);   //to speed it up because in most cases type will be 1
-        strcpy(header_type_name, "ETH10MB");
+        header_type_name = "ETH10MB";
     }
     //print the label
     printf("Link-Layer Header Type: %s\n", header_type_name);
-    free(header_type_name);
-    header_type_name = NULL; // Fixes #6 Issue : Memory Safety Violation
+
     return type;
 }
 
@@ -114,17 +118,33 @@ unsigned char* readMACAddress(FILE* file){
 
 int readType(FILE* file){
     unsigned char* type = readBytes(file, 2);
+    if(type == NULL){
+        return NOK;
+    }
+
     if(type[0] == 0x08){
         if(type[1] == 0x00){
+            free(type);
+            type = NULL;
+
             return IPV4;
         }
         if(type[1] == 0x06){
+            free(type);
+            type = NULL;
+
             return ARP;
         }
     }
     if(type[0] == 0x86 && type[1] == 0xdd){
+        free(type);
+        type = NULL;
+
         return IPV6;
     }
+
+    free(type);
+    type = NULL;
 
     return UNKNOWN;
 }
@@ -214,8 +234,8 @@ long long numDatagrams(parser_t* parser){
 
 int parseGlobalHeader(FILE* file){
     int mag_num = checkMagicNumber(file);
-    if(mag_num != LITTLE_ENDIAN){
-        if(mag_num == BIG_ENDIAN){
+    if(mag_num != LITTLE_ENDIAN_){
+        if(mag_num == BIG_ENDIAN_){
             printf("Big endian - sorry, we're not parsing this.");
         } else {
             printf("Magic number incorrect\n");
@@ -225,7 +245,7 @@ int parseGlobalHeader(FILE* file){
 
     //read and print version number
     unsigned char* version_num = readBytes(file, 4);
-    if(!version_num){
+    if(version_num == NULL){
         printf("Could not read version number: File corrupted/too small\n");
         return NOK;
     }
@@ -307,13 +327,36 @@ int parse(parser_t *parser, char *filename){
         }
         unsigned char* src_addr = readMACAddress(file); //we don't really need this in this project but anyway..
         if(dst_addr == NULL){
+            free(dst_addr);
+            dst_addr = NULL;
             printf("Could not read source MAC address\n");
             return NOK;
         }
 
         int type = readType(file);
+        if(type == NOK){
+            printf("Error reading protocol\n");
+
+            free(dst_addr);
+            dst_addr = NULL;
+            free(src_addr);
+            src_addr = NULL;
+
+            return NOK;
+        }
 
         unsigned char* data = readData(file, capt_data_len - 18);
+        if(data == NULL){
+            printf("Error reading data from file\n");
+
+            free(dst_addr);
+            dst_addr = NULL;
+            free(src_addr);
+            src_addr = NULL;
+
+            return NOK;
+        }
+
         if(skipCRC(file) == NOK){
             return NOK;
         }

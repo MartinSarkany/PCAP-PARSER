@@ -28,6 +28,7 @@ int main(int argc, char *argv[])
     printUDPStats();
     print4thLayer(&parser);
     clearPackets(&parser.packet_list);
+    clearDatagrams(&parser.datagram_list);
 
     return 0;
 }

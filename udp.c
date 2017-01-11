@@ -146,6 +146,7 @@ int process_packets(packet_t* packet_list, datagram_t** datagram_list_p){
     do{
         // Collect stats for total number of datagram parsed
         udp_stats.totalDatagrams++;
+
         if(cur_packet->data_size < 8){
             printf("Corrupted datagram");
             cur_packet = cur_packet->next;
@@ -172,3 +173,15 @@ int process_packets(packet_t* packet_list, datagram_t** datagram_list_p){
 
     return OK;
 }
+
+void clearDatagrams(datagram_t** datagram_list_p){
+    datagram_t* cur_datagram = (*datagram_list_p);
+    while(cur_datagram){
+        datagram_t* prev_datagram = cur_datagram;
+        cur_datagram = cur_datagram->next;
+        free(prev_datagram);
+        prev_datagram = NULL; // Fixes #6 Issue : Memory Safety Violation
+    }
+    *datagram_list_p = NULL;
+}
+

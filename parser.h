@@ -9,8 +9,8 @@
 #define OK 1
 #define NOK 0
 
-#define LITTLE_ENDIAN 1
-#define BIG_ENDIAN 2
+#define LITTLE_ENDIAN_ 1
+#define BIG_ENDIAN_ 2
 
 // parser structure, lists of frames, packets and datagrams
 typedef struct{

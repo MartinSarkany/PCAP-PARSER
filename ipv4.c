@@ -121,8 +121,12 @@ int process_frames(frame_t* frame_list, packet_t** packet_list_p){
             cur_frame = cur_frame->next;
             continue;
         }
-        int total_len = extractTotalLength(data + 2);
-        int data_len = total_len - header_len;
+        /*int total_len = */extractTotalLength(data + 2);
+        //int data_len = total_len - header_len;
+        // for some reason, packet size stated in file is always 4 bytes more than actual data size
+        // and we don't care about data at all so will just ignore it
+        int data_len = cur_frame->data_size - header_len;
+
         int fragmented = isFragmented(data[6]);
         if(fragmented && !zeroOffset(data+6)){
             cur_frame = cur_frame->next;
