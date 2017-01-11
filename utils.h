@@ -20,8 +20,6 @@ size_t getline(char **lineptr, size_t *n, FILE *stream);
 unsigned int arrayToUInt(unsigned char* buffer, int size);
 // converts array of bytes to unsigned integer - big endian
 unsigned int arrayToUIntBE(unsigned char* buffer, int size);
-// returns name for the given number of protocol
-char* headerTypeName(int header_type_num);
 // prints version number
 void printVersionNumber(unsigned char* ver_num);
 // prints time in human readable form

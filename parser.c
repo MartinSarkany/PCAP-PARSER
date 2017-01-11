@@ -71,13 +71,11 @@ int linkLayerHeaderType(FILE* file){
     unsigned int type = arrayToUInt(llht, 4);
     char* header_type_name;
     if(type != 1){
-        // read label from file if it's not 1
-        header_type_name = headerTypeName(type);
-        if(!header_type_name){
-            header_type_name = malloc(16 * sizeof(char));
-            memset(header_type_name, sizeof(char), 16);
-            strcpy(header_type_name, "File not found\n");
-        }
+        // not ethernet, we're not parsing this
+        header_type_name = malloc(16 * sizeof(char));
+        memset(header_type_name, sizeof(char), 16);
+        strcpy(header_type_name, "UNKNOWN\n");
+
     } else {    // we already know what the 1 is so no need to read the file at all
         header_type_name = malloc(9);   //to speed it up because in most cases type will be 1
         strcpy(header_type_name, "ETH10MB");
