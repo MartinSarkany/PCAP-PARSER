@@ -36,7 +36,7 @@ int printTimeStuff(FILE* file);
 // stored as ethernet)
 int linkLayerHeaderType(FILE* file);
 // maximum length of captured packets (larger packets are cut)
-int maxFrameLength(FILE* file);
+long long maxFrameLength(FILE* file);
 // reads time stamp
 long long readTimeStamp(FILE* file);
 // reads microseconds part of time stamp

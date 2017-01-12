@@ -33,7 +33,7 @@ unsigned int arrayToUIntBE(unsigned char* buffer, int size){
 void printVersionNumber(unsigned char* ver_num){
     unsigned int majVer = ver_num[1] * 255 + ver_num[0];
     unsigned int minVer = ver_num[3] * 255 + ver_num[2];
-    printf("Version: %d.%d\n", majVer, minVer);
+    printf("Version: %u.%u\n", majVer, minVer);
 }
 
 void printTime(time_t time){

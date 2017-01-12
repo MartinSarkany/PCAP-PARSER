@@ -11,7 +11,7 @@ long long readStuff(FILE* file, size_t size){   //reading up to 7 bytes of data
         printf("Overflow could happen, returning -1\n");
         return -1;
     }
-    unsigned char stuff_buff[4];
+    unsigned char stuff_buff[size];
     if(fread(stuff_buff, sizeof(unsigned char), size, file) != size){
         return -1;
     }
@@ -96,7 +96,7 @@ int linkLayerHeaderType(FILE* file){
     return type;
 }
 
-int maxFrameLength(FILE* file){
+long long maxFrameLength(FILE* file){
     return readStuff(file, 4);
 }
 
@@ -207,7 +207,7 @@ void printDatagram(datagram_t* datagram){
     printIPAddress(packet->src_IP);
     printf("Destination IP:   ");
     printIPAddress(packet->dst_IP);
-    printf("Source port:      %d\nDestination port: %d\n", datagram->src_port, datagram->dst_port);
+    printf("Source port:      %u\nDestination port: %u\n", datagram->src_port, datagram->dst_port);
     printf("Data size:        %d", datagram->data_size);
     printf("\n\n");
     //printf("\n+++++++++++++++++++++ Datagram +++++++++++++++++++++++\n");
@@ -262,12 +262,15 @@ int parseGlobalHeader(FILE* file){
 
     //read maximum frame length (Snapshot Length)
     //Fixes #10 Issue : Integer Overflow
-    unsigned long long snapshot_length;   //max. frame length
+    long long snapshot_length;   //max. frame length
     if((snapshot_length = maxFrameLength(file)) == -1){
         printf("Could not read Snapshot Length: File corrupted/too small\n");
         return NOK;
     }
-    printf("Snapshot length: %d bytes\n", (unsigned int)snapshot_length);
+
+    printf("Snapshot length: ");
+    printLongLong(snapshot_length);
+    printf(" bytes\n");
 
     //read Link-Layer Header Type
     int llht = linkLayerHeaderType(file); //also print
