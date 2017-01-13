@@ -15,18 +15,21 @@ int main(int argc, char *argv[])
     initParser(&parser);
 
     if(parse(&parser, filename) == NOK){
-        printf("\n\n PARSING FAILED\n\n");
+        printf("\n\nPARSING FAILED\n\n");
         exit(1);
     }
 
-    process_frames(parser.frame_list, &parser.packet_list);
-    process_packets(parser.packet_list, &parser.datagram_list);
+    processFrames(parser.frame_list, &parser.packet_list);
+    processPackets(parser.packet_list, &parser.datagram_list);
+
     clearFrames(&parser.frame_list);
+
     printf("Total number of datagrams: ");
     printLongLong(numDatagrams(&parser));
     printf("\n\n");
     printUDPStats();
     print4thLayer(&parser);
+
     clearPackets(&parser.packet_list);
     clearDatagrams(&parser.datagram_list);
 

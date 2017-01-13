@@ -2,11 +2,11 @@
 
 #ifdef WIN32
 void printLongLong(long long n){
-    printf("%I64d", n);
+    printf("%I64d", n); // windows
 }
 #else
 void printLongLong(long long n){
-    printf("%lld", n);
+    printf("%lld", n);  // linux
 }
 #endif
 
@@ -62,4 +62,9 @@ void printIPAddress(unsigned char* addr){
     printf("%u.%u.%u.%u\n", addr[0], addr[1], addr[2], addr[3]);
 }
 
-
+void freePtr(void** ptr){
+    if(*ptr != NULL){
+        free(*ptr);
+        *ptr = NULL;
+    }
+}
