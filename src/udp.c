@@ -93,6 +93,7 @@ datagram_t* addDatagram(datagram_t** datagram_list_p, datagram_t* new_datagram){
     }
 
     datagram_t* current_datagram = *datagram_list_p;
+
     while(current_datagram->next != NULL){
         current_datagram = current_datagram->next;
     }
@@ -135,7 +136,7 @@ void printUDPStats() {
   printf("\n------------------UDP Stats----------------------\n");
 }
 
-int process_packets(packet_t* packet_list, datagram_t** datagram_list_p){
+int processPackets(packet_t* packet_list, datagram_t** datagram_list_p){
     if(!packet_list){
         return NOK;
     }
@@ -146,9 +147,11 @@ int process_packets(packet_t* packet_list, datagram_t** datagram_list_p){
     do{
         // Collect stats for total number of datagram parsed
         udp_stats.totalDatagrams++;
+
         if(cur_packet->data_size < 8){
             printf("Corrupted datagram");
             cur_packet = cur_packet->next;
+
             // Collect stats for corrupt datagrams
             udp_stats.corruptDatagrams++;
             continue;
@@ -172,3 +175,16 @@ int process_packets(packet_t* packet_list, datagram_t** datagram_list_p){
 
     return OK;
 }
+
+void clearDatagrams(datagram_t** datagram_list_p){
+    datagram_t* cur_datagram = (*datagram_list_p);
+
+    while(cur_datagram){
+        datagram_t* prev_datagram = cur_datagram;
+        cur_datagram = cur_datagram->next;
+        freePtr((void**)&prev_datagram);
+    }
+
+    *datagram_list_p = NULL;
+}
+

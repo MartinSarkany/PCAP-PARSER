@@ -1,5 +1,7 @@
-#include "eth_frame.h"
+#include "ethernet.h"
 
+// UNUSED - long parameter list but I still kinda like it more than the new way
+// creates new frame
 frame_t* createFrame(time_t timestamp, int microsecs, int cap_len, int real_len,
                        unsigned char* src_addr, unsigned char* dst_addr, int type,
                        unsigned char* data, int data_size){
@@ -20,10 +22,12 @@ frame_t* createFrame(time_t timestamp, int microsecs, int cap_len, int real_len,
     return frame;
 }
 
+// adds frame to list
 frame_t* addFrame(frame_t** frame_list_p, frame_t* new_frame){
     if(!frame_list_p){
         return NULL;    //should not happen
     }
+
     //if empty list, initialize
     if(!(*frame_list_p)){
         *frame_list_p = new_frame;
@@ -40,19 +44,23 @@ frame_t* addFrame(frame_t** frame_list_p, frame_t* new_frame){
     return new_frame;
 }
 
+// releases memory held by frame
 void clearFrame(frame_t* frame){
-    free(frame->dst_addr);
-    free(frame->src_addr);
-    free(frame->data);
+    freePtr((void**)&frame->dst_addr);
+    freePtr((void**)&frame->src_addr);
+    freePtr((void**)&frame->data);
 }
 
+// releases all memory
 void clearFrames(frame_t** frame_list_p){
     frame_t* cur_frame = (*frame_list_p);
+
     while(cur_frame){
         clearFrame(cur_frame);
         frame_t* prev_frame = cur_frame;
         cur_frame = cur_frame->next;
-        free(prev_frame);
+        freePtr((void**)&prev_frame);
     }
+
     *frame_list_p = NULL;
 }
